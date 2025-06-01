@@ -117,6 +117,9 @@
                 <button class="nav-button active" data-view-id="q1-scatter-view">支出与入学率</button>
                 <button class="nav-button" data-view-id="q2-scatter-view">师生比与重点中学比例 </button>
                 <button class="nav-button" data-view-id="q3-scatter-view">一本率与重点中学比例 </button>
+                <button class="nav-button" data-view-id="teacher-structure-view">教师结构分析</button>
+                <button class="nav-button" data-view-id="university-stats-view">高校统计与分类</button>
+                <button class="nav-button" data-view-id="education-attainment-view">人口受教育结构</button>
             </nav>
 
             <div id="q1-scatter-view" class="visualization-view active-view">
@@ -193,43 +196,136 @@
                     <p style="text-align:center; padding-top:50px;">Q3 散点图加载中...</p>
                 </div>
             </div>
+
+            <div id="teacher-structure-view" class="visualization-view">
+                <h3>各地区教师学历与职称结构</h3>
+                <div class="controls teacher-controls">
+                    <div>
+                        <label for="teacher-stack-by">堆叠方式:</label>
+                        <select id="teacher-stack-by">
+                            <option value="education">按学历</option>
+                            <option value="title">按职称</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="teacher-value-type">显示方式:</label>
+                        <select id="teacher-value-type">
+                            <option value="absolute">绝对数量</option>
+                            <option value="percentage">百分比</option>
+                        </select>
+                    </div>
+                    <!-- 新增地区选择器用于饼图 -->
+                    <div>
+                        <label for="teacher-pie-region-select">查看饼图地区:</label>
+                        <select id="teacher-pie-region-select">
+                            <!-- 选项将由JS动态填充 -->
+                        </select>
+                    </div>
+                </div>
+                <div id="teacher-structure-chart-container" class="chart-container" style="height: 500px;">
+                    <p style="text-align:center; padding-top:50px;">教师结构图表加载中...</p>
+                </div>
+                <div style="display:flex; justify-content: space-around; margin-top:20px;">
+                    <div id="teacher-education-pie-container" style="width:48%; height:350px; border: 1px solid #eee;"></div>
+                    <div id="teacher-title-pie-container" style="width:48%; height:350px; border: 1px solid #eee;"></div>
+                </div>
+            </div>
+            
+            <div id="university-stats-view" class="visualization-view">
+                <h3>各地区高校数量、类型及重点建设情况分析</h3>
+                <div class="controls university-stats-controls">
+                    <div>
+                        <label for="uni-stats-group-by">图表分组/堆叠方式:</label>
+                        <select id="uni-stats-group-by">
+                            <option value="type">按类型</option>
+                            <option value="level">按办学层次</option>
+                            <option value="public_private">按公办/民办</option>
+                            <option value="key_project">按重点建设</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="university-stats-chart-container" class="chart-container" style="height: 500px;">
+                    <p style="text-align:center; padding-top:50px;">高校统计图表加载中...</p>
+                </div>
+                <div style="display:flex; justify-content: space-around; margin-top:20px; align-items: flex-start;">
+                    <div id="uni-type-pie-container" style="width:30%; height:300px; border: 1px solid #eee;"></div>
+                    <div id="uni-level-pie-container" style="width:30%; height:300px; border: 1px solid #eee;"></div>
+                    <div id="uni-key-indicators-container" style="width:35%; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+                        <h4>关键指标 (<span id="uni-indicator-region">全国</span>):</h4>
+                        <p>大学总数: <span id="uni-total-count">-</span></p>
+                        <p>985高校数: <span id="uni-985-count">-</span></p>
+                        <p>211高校数: <span id="uni-211-count">-</span></p>
+                        <p>双一流高校数: <span id="uni-dual-一流-count">-</span></p>
+                        </div>
+                </div>
+                <div id="university-summary-table-container" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
+                     <p style="text-align:center;">大学统计列表加载中...</p>
+                </div>
+            </div>
+
+            <div id="education-attainment-view" class="visualization-view">
+                <h3>各地区每十万人受教育程度分布</h3>
+                <div class="controls education-attainment-controls">
+                    <div>
+                        <label for="education-display-type">显示方式:</label>
+                        <select id="education-display-type">
+                            <option value="percentage">结构占比 (%)</option>
+                            <option value="absolute">绝对数量/十万</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="education-attainment-chart-container" class="chart-container" style="height: 500px;">
+                    <p style="text-align:center; padding-top:50px;">人口受教育结构图表加载中...</p>
+                </div>
+            </div>
+
         </section>
     </div>
 
     <footer>
-        <p>&copy; 2025 教育数据可视化项目</p>
+        <p>© 2025 教育数据可视化项目</p>
     </footer>
 
     <script src="js/global_map.js"></script>
     <script src="js/visualization_q1_scatter.js"></script>
     <script src="js/visualization_q2_scatter.js"></script>
     <script src="js/visualization_q3_scatter.js"></script>
+    <script src="js/visualization_teacher_structure.js"></script>
+    <script src="js/visualization_university_stats.js"></script>
+    <script src="js/visualization_education_attainment.js"></script>
     <script src="js/main_app.js"></script>
     <script src="js/histogram_comparison.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const navButtons = document.querySelectorAll('.nav-button');
-            const views = document.querySelectorAll('.visualization-view');
+        // 这个内联脚本可以保持原样，因为它只处理基础的标签页切换逻辑，
+        // main_app.js 会处理更复杂的初始化和图表resize。
+        // 或者，如果你想让 main_app.js 完全接管，可以注释掉这个内联脚本的 `addEventListener` 部分，
+        // 只保留初始激活的逻辑，或者完全由 main_app.js 的 `showAnalyticalView` 在初始化时激活第一个视图。
+        // 为了避免冲突和重复，建议让 main_app.js 的初始化逻辑来处理首次视图激活。
+        // 此处的内联脚本的视图切换逻辑已被 main_app.js 中的 showAnalyticalView 函数覆盖和增强。
+        // 因此，可以简化或移除此内联脚本中的点击事件监听，只确保 main_app.js 正确初始化。
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     const navButtons = document.querySelectorAll('.nav-button');
+        //     const views = document.querySelectorAll('.visualization-view');
 
-            // 确保至少有一个视图是激活的（通常是第一个）
-            const firstViewId = navButtons.length > 0 ? navButtons[0].getAttribute('data-view-id') : null;
-            if (firstViewId) {
-                document.getElementById(firstViewId)?.classList.add('active-view');
-                navButtons[0]?.classList.add('active');
-            }
+        //     // 确保 main_app.js 处理初始激活
+        //     // const firstViewId = navButtons.length > 0 ? navButtons[0].getAttribute('data-view-id') : null;
+        //     // if (firstViewId) {
+        //     //     document.getElementById(firstViewId)?.classList.add('active-view');
+        //     //     navButtons[0]?.classList.add('active');
+        //     // }
 
 
-            navButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    navButtons.forEach(btn => btn.classList.remove('active'));
-                    views.forEach(view => view.classList.remove('active-view'));
+        //     // navButtons.forEach(button => {
+        //     //     button.addEventListener('click', function () {
+        //     //         navButtons.forEach(btn => btn.classList.remove('active'));
+        //     //         views.forEach(view => view.classList.remove('active-view'));
 
-                    this.classList.add('active');
-                    const viewId = this.getAttribute('data-view-id');
-                    document.getElementById(viewId).classList.add('active-view');
-                });
-            });
-        });
+        //     //         this.classList.add('active');
+        //     //         const viewId = this.getAttribute('data-view-id');
+        //     //         document.getElementById(viewId).classList.add('active-view');
+        //     //     });
+        //     // });
+        // });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'948fc6c44bbe5ff8',t:'MTc0ODc5MjA4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
