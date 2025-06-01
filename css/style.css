@@ -3,9 +3,10 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
-    background-image: url('../images/p6.webp'); 
-    background-repeat: repeat;               
-    background-color: #f4f7f6;             
+    /* background-image: url('../images/p6.webp'); */ /* 您之前的纹理背景 */
+    background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); /* 您当前使用的渐变背景 */
+    background-repeat: repeat;      
+    /* background-color: #f4f7f6; */ /* 被渐变背景覆盖，可作为后备 */
     color: #333;
     line-height: 1.6;
 }
@@ -13,7 +14,7 @@ body {
 header {
     text-align: center;
     margin-bottom: 25px;
-    background-color: #fff; /* Kept white to stand out against the pattern */
+    background-color: #fff; 
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -25,7 +26,7 @@ h1 {
     font-size: 2em;
 }
 
-h2 { /* 内容区域的主标题，如 "中国教育数据概览地图" */
+h2 { /* 内容区域的主标题 */
     color: #0056b3;
     font-size: 1.5em;
     margin-top: 0;
@@ -46,48 +47,39 @@ p {
     font-size: 0.9em;
 }
 
-/* main不再直接控制最大宽度，由 .main-content-wrapper 控制 */
-main { /* Though you don't have a <main> tag in the HTML, this rule would apply if you did */
+main { 
     margin: 0 auto;
 }
 
-/* 主内容区垂直布局容器 */
 .main-content-wrapper {
     display: flex;
-    flex-direction: column; /* 核心：地图区和分析区垂直排列 */
-    gap: 25px; /* 上下区域间距 */
-    max-width: 1200px; /* 整体内容区最大宽度并居中 */
+    flex-direction: column; 
+    gap: 25px; 
+    max-width: 1200px; 
     margin: 0 auto;
 }
 
-/* 全局地图区域和分析图表区域的通用容器样式 */
 .content-section {
-    background-color: #fff; /* Kept white to stand out against the pattern */
+    background-color: #fff; 
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-#global-map-section {
-    width: 100%; /* 占据整行 */
+#global-map-section,
+#analytical-charts-section,
+#grouped-bar-comparison-section { /* 将新区域也包含进来 */
+    width: 100%; 
     display: flex;
-    flex-direction: column; /* 内部元素垂直排列 (标题、控件、地图容器) */
+    flex-direction: column; 
 }
 
-#analytical-charts-section {
-    width: 100%; /* 占据整行 */
-    display: flex;
-    flex-direction: column; /* 内部元素垂直排列 (导航、视图容器) */
-}
-
-
-/* 分析图表区的Tab导航样式 */
 .analytical-charts-navigation {
     display: flex;
-    justify-content: flex-start; /* 按钮靠左对齐 */
-    gap: 0; /* 按钮间无间隔，通过margin-right实现重叠 */
+    justify-content: flex-start; 
+    gap: 0; 
     margin-bottom: 20px;
-    border-bottom: 2px solid #0056b3; /* 导航底部的蓝色实线 */
+    border-bottom: 2px solid #0056b3; 
 }
 
 .nav-button {
@@ -95,10 +87,10 @@ main { /* Though you don't have a <main> tag in the HTML, this rule would apply 
     font-size: 0.95em;
     cursor: pointer;
     border: 1px solid #ccc;
-    border-bottom: none; /* 底部边框由 .analytical-charts-navigation 的 border-bottom 提供 */
+    border-bottom: none; 
     background-color: #f8f9fa;
-    border-radius: 6px 6px 0 0; /* 顶部圆角形成tab效果 */
-    margin-right: -1px; /* 实现边框重叠效果 */
+    border-radius: 6px 6px 0 0; 
+    margin-right: -1px; 
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -107,28 +99,27 @@ main { /* Though you don't have a <main> tag in the HTML, this rule would apply 
     border-color: #bbb;
 }
 
-.nav-button.active { /* 当前激活的导航按钮 */
+.nav-button.active { 
     background-color: #0056b3;
     color: #fff;
-    border-color: #0056b3 #0056b3 #0056b3; /* 激活时三边(上左右)边框同色 */
+    border-color: #0056b3 #0056b3 #0056b3; 
     font-weight: bold;
-    position: relative; /* 用于z-index确保边框显示在其他按钮之上 */
+    position: relative; 
     z-index: 1;
 }
 
-/* 可视化视图容器 (用于Tab切换显示不同图表) */
 .visualization-view {
-    display: none; /* 默认隐藏 */
+    display: none; 
     border: 1px solid #ddd;
-    border-top: none; /* 顶部边框与导航栏的底线融合 */
-    padding: 20px;   /* 视图内部内容区的内边距 */
-    border-radius: 0 0 6px 6px; /* 底部圆角，配合导航按钮 */
-    background-color: #fff; /* Kept white to make content clear over body pattern */
+    border-top: none; 
+    padding: 20px;   
+    border-radius: 0 0 6px 6px; 
+    background-color: #fff; 
 }
 
-.visualization-view.active-view { /* 当前显示的视图 */
+.visualization-view.active-view { 
     display: block;
-    animation: fadeInView 0.3s ease-out; /* 淡入动画效果 */
+    animation: fadeInView 0.3s ease-out; 
 }
 
 @keyframes fadeInView {
@@ -136,104 +127,107 @@ main { /* Though you don't have a <main> tag in the HTML, this rule would apply 
     to { opacity: 1; }
 }
 
-/* 通用筛选控件区域样式 */
-.controls {
+.controls, 
+.comparison-controls { /* 合并通用样式 */
     margin-bottom: 15px;
-    padding: 12px;
-    background-color: #f9f9f9; /* Light background for controls, stands out on white .content-section */
+    padding: 12px; /* 调整为12px，您可以按需改回20px */
+    background-color: #f9f9f9; 
     border-radius: 4px;
     border: 1px solid #e9ecef;
     display: flex;
-    flex-wrap: wrap; /* 控件多时自动换行 */
-    gap: 15px; /* 控件组之间的间距 */
-    align-items: center; /* 控件垂直居中对齐 */
+    flex-wrap: wrap; 
+    gap: 15px; /* 调整为15px，您可以按需改回25px */
+    align-items: center; 
+}
+@media (max-width: 768px) { /* 确保这个也应用到 .comparison-controls */
+    .controls,
+    .comparison-controls {
+        flex-direction: column; 
+    }
 }
 
-.controls label {
+
+.controls label { /* 这个是地图筛选控件的label */
     font-weight: bold;
     margin-right: 5px;
     font-size: 0.9em;
 }
-
 .controls select,
-.controls input[type="range"] { /* 下拉框和范围滑块的通用样式 */
+.controls input[type="range"] {
     padding: 7px 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 0.9em;
 }
-
 .controls select {
-    min-width: 120px; /* 下拉框最小宽度 */
+    min-width: 120px; 
 }
 
-/* input[type="range"] 范围滑块样式重置与自定义 */
-input[type="range"] {
-    width: 150px; /* 滑块轨道宽度 */
-    -webkit-appearance: none; /* 移除浏览器默认外观 (Chrome, Safari, Edge) */
-    appearance: none; /* 移除浏览器默认外观 (Firefox) */
-    background: #ddd; /* 滑块轨道背景色 */
-    outline: none; /* 移除焦点时的轮廓 */
-    height: 8px; /* 滑块轨道高度 */
-    border-radius: 5px; /* 滑块轨道圆角 */
+input[type="range"] { /* 地图滑块的通用样式 */
+    width: 150px; 
+    -webkit-appearance: none; 
+    appearance: none; 
+    background: #ddd; 
+    outline: none; 
+    height: 8px; 
+    border-radius: 5px; 
     cursor: pointer;
-    margin: 0 5px; /* 滑块与其他元素间距 */
+    margin: 0 5px; 
 }
-
-/* Webkit (Chrome, Safari, Edge) 浏览器滑块拖动按钮样式 */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px; /* 拖动按钮宽度 */
-    height: 16px; /* 拖动按钮高度 */
-    border-radius: 50%; /* 圆形按钮 */
-    background: #007bff; /* 拖动按钮背景色 */
+    width: 16px; 
+    height: 16px; 
+    border-radius: 50%; 
+    background: #007bff; 
     cursor: pointer;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2); /* 轻微阴影 */
+    box-shadow: 0 0 2px rgba(0,0,0,0.2); 
 }
-
-/* Firefox 浏览器滑块拖动按钮样式 */
 input[type="range"]::-moz-range-thumb {
     width: 16px;
     height: 16px;
     border-radius: 50%;
     background: #007bff;
     cursor: pointer;
-    border: none; /* Firefox 可能需要移除边框 */
+    border: none; 
     box-shadow: 0 0 2px rgba(0,0,0,0.2);
 }
 
-/* 滑块组 (label + 两个滑块 + span) 的容器样式 */
 .slider-group {
     display: flex;
     align-items: center;
-    gap: 8px; /* 组内元素间距 */
+    gap: 8px; 
 }
-
-.slider-group span { /* 用于显示滑块范围的文本 */
+.slider-group span { 
     font-size: 0.85em;
     color: #555;
-    white-space: nowrap; /* 防止文本换行 */
-    min-width: 100px; /* 确保有足够宽度显示范围文本 */
-    text-align: right; /* 文本靠右对齐，可根据需要调整 */
+    white-space: nowrap; 
+    min-width: 100px; 
+    text-align: right; 
 }
 
-/* 通用图表容器样式 */
-.chart-container {
-    height: 450px; /* 图表固定高度 */
+.chart-container, /* 地图和散点图的容器 */
+#main-comparison-chart-container.echart-container-large { /* 新的对比图表容器 */
+    height: 450px; /* 统一图表高度，对比图表可以设为500px，这里保持一致 */
     border: 1px solid #e0e0e0;
     border-radius: 5px;
-    background-color: #fff; /* Kept white for chart readability */
-    padding: 10px; /* 内边距，给图表留出呼吸空间 */
-    display: flex; /* 用于居中内部的占位符文本或加载提示 */
+    background-color: #fff; 
+    padding: 10px; 
+    display: flex; 
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* 防止图表内容溢出 */
-    width: 100%; /* 宽度撑满其父容器 */
-    box-sizing: border-box; /* padding 和 border 不会增加总宽度 */
+    overflow: hidden; 
+    width: 100%; 
+    box-sizing: border-box; 
+}
+/* 特别为对比图表容器设置高度，如果想让它不同 */
+#main-comparison-chart-container.echart-container-large {
+    height: 500px; 
+    display: none; /* 默认隐藏 */
 }
 
-/* 页脚 */
+
 footer {
     text-align: center;
     margin-top: 30px;
@@ -241,6 +235,84 @@ footer {
     color: #777;
     font-size: 0.85em;
     border-top: 1px solid #eee;
-    background-color: #fff; /* Optional: Give footer a solid background too */
-                           /* Or remove/comment this to let body pattern show, if desired */
+    background-color: #fff; 
+}
+
+/* 区域指标对比分析区特定样式 - 标题已在通用 h2 中定义 */
+/* .comparison-controls 已在 .controls 中合并 */
+
+.control-group { /* 适用于地图筛选和对比筛选 */
+    flex: 1;
+    min-width: 200px; /* 保证最小宽度 */
+}
+.control-group h4 {
+    margin-top: 0;
+    margin-bottom: 8px; /* 统一边距 */
+    font-size: 1.1em;
+    color: #333;
+}
+
+.checkbox-list {
+    height: 220px;    /* 固定高度，确保两个选择框视觉大小一致 */
+    overflow-y: auto; 
+    border: 1px solid #ccc;
+    padding: 12px;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-top: 8px;  /* 为上方的按钮留出空间 */
+}
+.checkbox-list label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #444;
+    cursor: pointer;
+}
+.checkbox-list label:hover {
+    background-color: #f0f8ff;
+}
+.checkbox-list input[type="checkbox"] {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.action-button { /* 主生成图表按钮的样式 */
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.action-button:hover {
+    background-color: #0056b3;
+}
+
+.checkbox-actions { /* 全选/重置按钮的容器 */
+    display: flex;   
+    gap: 10px;       
+    margin-bottom: 10px; 
+}
+
+.checkbox-action-btn { /* 全选/重置按钮的具体样式 */
+    padding: 5px 10px;
+    font-size: 0.85em;   
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.checkbox-action-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.chart-display-area .placeholder-text { /* 对比图表区域的占位符 */
+    width: 100%;
+    text-align: center;
+    color: #777;
+    font-size: 1em;
+    padding: 30px 0;
 }

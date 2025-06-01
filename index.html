@@ -6,6 +6,7 @@
     <title>教育数据多维分析平台</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
 </head>
 <body>
     <header>
@@ -78,15 +79,48 @@
             </div>
         </section>
 
+        <section id="grouped-bar-comparison-section" class="content-section">
+            <h2>区域指标对比分析</h2>
+                <div class="comparison-controls">
+                    <div class="control-group">
+                        <h4>选择对比地区 (可多选):</h4>
+                        <div class="checkbox-actions">
+                            <button id="region-select-all-btn" class="checkbox-action-btn">全选所有地区</button>
+                            <button id="region-reset-btn" class="checkbox-action-btn">清空所选地区</button>
+                        </div>
+                        <div id="region-checkboxes-comparison" class="checkbox-list">
+                            <p>地区列表加载中...</p>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h4>选择分析指标 (可多选):</h4>
+                        <div class="checkbox-actions">
+                            <button id="indicator-select-all-btn" class="checkbox-action-btn">全选所有指标</button>
+                            <button id="indicator-reset-btn" class="checkbox-action-btn">清空所选指标</button>
+                        </div>
+                        <div id="indicator-checkboxes-comparison" class="checkbox-list">
+                            <p>指标列表加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button id="generate-comparison-chart-btn" class="action-button">生成对比图表</button>
+            </div>
+            <div id="comparison-chart-display-area" class="chart-display-area"> <div id="main-comparison-chart-container" class="echart-container-large">
+                    </div>
+                <p class="placeholder-text" id="comparison-chart-placeholder">请选择地区和指标后点击“生成对比图表”。</p>
+            </div>
+        </section>
+
         <section id="analytical-charts-section" class="content-section">
             <nav class="analytical-charts-navigation">
-                <button class="nav-button active" data-view-id="q1-scatter-view">支出与入学率 (Q1)</button>
-                <button class="nav-button" data-view-id="q2-scatter-view">师生比与重点中学比例 (Q2)</button>
-                <button class="nav-button" data-view-id="q3-scatter-view">一本率与重点中学比例 (Q3)</button>
+                <button class="nav-button active" data-view-id="q1-scatter-view">支出与入学率</button>
+                <button class="nav-button" data-view-id="q2-scatter-view">师生比与重点中学比例 </button>
+                <button class="nav-button" data-view-id="q3-scatter-view">一本率与重点中学比例 </button>
             </nav>
 
             <div id="q1-scatter-view" class="visualization-view active-view">
-                <h3>问题1: 地区教育入学率与教育支出之间的关系</h3>
+                <h3>地区教育入学率与教育支出之间的关系</h3>
                 <div class="controls q1-scatter-controls">
                     <div>
                         <label for="expenditure-filter-q1-min">教育经费合计范围:</label>
@@ -111,7 +145,7 @@
             </div>
 
             <div id="q2-scatter-view" class="visualization-view">
-                <h3>问题2: 师生比与重点中学比例的关联性</h3>
+                <h3>师生比与重点中学比例的关联性</h3>
                 <div class="controls q2-scatter-controls">
                     <div>
                         <label for="tsratio-filter-q2-min">师生比范围:</label>
@@ -136,7 +170,7 @@
             </div>
 
             <div id="q3-scatter-view" class="visualization-view">
-                <h3>问题3: 地区一本率与重点中学比例的关系</h3>
+                <h3>地区一本率与重点中学比例的关系</h3>
                 <div class="controls q3-scatter-controls">
                     <div>
                         <label for="tier1rate-filter-q3-min">一本率范围:</label>
@@ -171,6 +205,7 @@
     <script src="js/visualization_q2_scatter.js"></script>
     <script src="js/visualization_q3_scatter.js"></script>
     <script src="js/main_app.js"></script>
+    <script src="js/histogram_comparison.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const navButtons = document.querySelectorAll('.nav-button');
@@ -194,40 +229,6 @@
                     document.getElementById(viewId).classList.add('active-view');
                 });
             });
-
-            // 注意：此处的ECharts初始化代码只是一个非常简单的占位符示例。
-            // 您实际的图表初始化逻辑应该在各自的JS文件 (global_map.js, visualization_q1_scatter.js等) 中。
-            // 如果您的JS文件已经处理了图表初始化，则不需要以下ECharts示例代码。
-            // 此处仅为防止页面在没有其他JS时显得完全空白。
-            /*
-            document.querySelectorAll('.chart-container').forEach(container => {
-                if (container.id && !echarts.getInstanceByDom(container)) { // 检查是否已初始化
-                    try {
-                        var myChart = echarts.init(container);
-                        var option = {
-                            title: {
-                                text: container.querySelector('p') ? container.querySelector('p').innerText.replace(' 加载中...', '') : '图表',
-                                left: 'center',
-                                top: 'center',
-                                textStyle: { color: '#888', fontSize: 16 }
-                            },
-                            grid: { top: '5%', left: '5%', right: '5%', bottom: '5%', containLabel: true },
-                            xAxis: { show: false },
-                            yAxis: { show: false },
-                            series: []
-                        };
-                        myChart.setOption(option);
-                        if(container.querySelector('p')) container.querySelector('p').style.display = 'none';
-                    } catch (e) {
-                        console.error("ECharts init failed for: " + container.id, e);
-                        if(container.querySelector('p')) container.querySelector('p').innerText = '图表加载失败';
-                    }
-                } else if (container.id && echarts.getInstanceByDom(container) && container.querySelector('p')) {
-                    // 如果已由其他脚本初始化，隐藏加载文字
-                     container.querySelector('p').style.display = 'none';
-                }
-            });
-            */
         });
     </script>
 </body>

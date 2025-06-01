@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const scatterOptionQ3 = {
                 title: {
-                    text: '地区一本率与重点中学比例关系 (Q3)',
+                    text: '地区一本率与重点中学比例关系',
                     left: 'center',
                     textStyle: { fontSize: 16 }
                 },

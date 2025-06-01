@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         "西藏": "西藏自治区", "新疆": "新疆维吾尔自治区"
     };
 
-    // 获取CSV地区名对应的GeoJSON地图地区名
     function getGeoMapRegionName(csvRegionName) { return regionNameMap[csvRegionName] || csvRegionName; }
 
     // 格式化指标值，用于Tooltip显示或数据处理
@@ -55,13 +54,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) {
             return forDisplay ? '无数据' : null;
         }
-        // 确保处理的是数字或可转换为数字的字符串
         if (typeof value !== 'number' && typeof value !== 'string') return String(value);
 
         let numValue = typeof value === 'string' ? parseFloat(value.replace('%','')) : value;
-        // 处理空字符串解析为NaN的情况
         if (isNaN(numValue) && typeof value === 'string' && value.trim() === '') return forDisplay ? '无数据' : null;
-        // 如果解析失败但原始值非空，则返回原始值(forDisplay为true时)或解析尝试值(forDisplay为false时)
         if (isNaN(numValue)) return forDisplay ? String(value) : value; 
 
         const percentageMetrics = ["一本率", "重点中学比例", "高等学校入学率"];
@@ -69,13 +65,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return numValue.toFixed(2) + (forDisplay ? '%' : '');
         }
         if (metricName === "师生比") {
-            return numValue.toFixed(2); // 师生比通常保留两位小数
+            return numValue.toFixed(2);
         }
-        // 其他数值型指标，如经费合计
         return forDisplay ? numValue.toLocaleString() : numValue; 
     }
 
-    // 异步加载地图GeoJSON和CSV数据
     async function loadMapData() {
         try {
             const geoJsonResponse = await fetch('data/china.json');
@@ -91,11 +85,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const headersLine = lines[0];
             if (!headersLine) throw new Error("地图CSV(all_data.csv)为空或无表头。");
             
-            const headers = headersLine.split(',').map(h => h.trim().replace(/^[\ufeff]/, '')); // 移除BOM并trim表头
+            const headers = headersLine.split(',').map(h => h.trim().replace(/^[\ufeff]/, '')); // 移除BOM
 
             mapRawData = lines.slice(1).map(line => {
                 const values = line.split(',').map(v => v.trim());
-                if (values.length < headers.length) return null; // 数据列数不足，此行作废
+                if (values.length < headers.length) return null; // 数据列数不足
                 const obj = {};
                 headers.forEach((header, i) => {
                     const val = values[i];
@@ -111,30 +105,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else if (header === '教育经费合计') {
                         obj[header] = isEmpty ? null : Number(val);
                     } else {
-                        obj[header.replace(/\s/g, '_')] = val; // 其他列直接存储或按需处理
+                        obj[header.replace(/\s/g, '_')] = val;
                     }
                 });
                 return obj;
-            }).filter(d => d && d['地区']); // 确保数据对象有效且有地区名
+            }).filter(d => d && d['地区']); // 确保数据有效且有地区名
 
             allMapRegions = Array.from(new Set(mapRawData.map(d => d['地区']))).sort();
+            window.mapRawData = mapRawData; // 使其对其他JS模块可用
+            window.allMapRegions = allMapRegions;
             console.log("全局地图: all_data.csv 数据加载处理完毕", mapRawData.length);
+            
+            const event = new CustomEvent('mapDataReady', { 
+                detail: { mapRawData: mapRawData, allMapRegions: allMapRegions } 
+            });
+            document.dispatchEvent(event);
+            console.log("全局地图: 'mapDataReady' 事件已派发。");
             return true;
         } catch (error) {
             console.error("全局地图数据加载或处理失败:", error);
             if (mapDom) mapDom.innerHTML = `<p style="color:red;">全局地图数据错误: ${error.message}</p>`;
+            const errorEvent = new CustomEvent('mapDataFailed', { detail: { error: error } });
+            document.dispatchEvent(errorEvent);
             return false;
         }
     }
 
-    // 更新滑块旁边的范围显示文本
     function updateGlobalMapRangeDisplays() {
         const updateDisplay = (minInput, maxInput, displaySpan, unit = '', isPercent = false) => {
             if (minInput && maxInput && displaySpan) {
                 const minVal = Number(minInput.value);
                 const maxVal = Number(maxInput.value);
-                // 使用 formatMetricValue 进行格式化以保持一致性，但需注意 metricName 参数
-                // 为简化，此处对百分比和普通数值做区分处理
                 const minText = isPercent ? minVal.toFixed(1) + '%' : parseFloat(minVal).toLocaleString(); 
                 const maxText = isPercent ? maxVal.toFixed(1) + '%' : parseFloat(maxVal).toLocaleString();
                 displaySpan.textContent = `${minText} - ${maxText}${unit}`;
@@ -148,59 +149,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay(mapHigherEdRateMinInput, mapHigherEdRateMaxInput, mapHigherEdRateRangeDisplay, '', true);
     }
 
-    // 初始化单个滑块的min/max属性和当前value
     function initializeSlider(minInput, maxInput, dataKey, isPercentage = false, defaultMin = 0, defaultMax = 100) {
-        if (!minInput || !maxInput) { // 确保DOM元素存在
+        if (!minInput || !maxInput) {
              console.warn(`滑块 ${dataKey} 的 DOM 元素未完全找到。`);
              if(minInput) { minInput.min = defaultMin; minInput.max = defaultMax; minInput.value = defaultMin;}
              if(maxInput) { maxInput.min = defaultMin; maxInput.max = defaultMax; maxInput.value = defaultMax;}
             return;
         }
-        if (mapRawData.length === 0) { // 如果没有数据，则使用默认范围
+        if (mapRawData.length === 0) {
             minInput.min = defaultMin; minInput.max = defaultMax; minInput.value = defaultMin;
             maxInput.min = defaultMin; maxInput.max = defaultMax; maxInput.value = defaultMax;
             return;
         }
 
         const values = mapRawData.map(d => d[dataKey]).filter(v => v !== null && !isNaN(v) && typeof v === 'number');
-        
         let dataMin, dataMax;
 
         if (isPercentage) {
-            minInput.min = 0; minInput.max = 100; // HTML属性范围
+            minInput.min = 0; minInput.max = 100;
             maxInput.min = 0; maxInput.max = 100;
             dataMin = values.length > 0 ? Math.floor(Math.min(...values)) : 0;
             dataMax = values.length > 0 ? Math.ceil(Math.max(...values)) : 100;
-            minInput.value = Math.max(0, Math.min(100, dataMin)); // 滑块当前值
+            minInput.value = Math.max(0, Math.min(100, dataMin));
             maxInput.value = Math.max(0, Math.min(100, dataMax));
         } else {
             dataMin = values.length > 0 ? Math.min(...values) : defaultMin;
             dataMax = values.length > 0 ? Math.max(...values) : defaultMax;
             
             if (dataMin === dataMax) { // 处理数据集中所有值相同的情况
-                if (dataMin !== 0) {
-                    dataMin *= 0.9; // 稍微扩大范围以便拖动
-                    dataMax *= 1.1;
-                } else { // 如果都是0
-                    dataMax = defaultMax || 1; // 避免0-0范围
-                }
+                if (dataMin !== 0) { dataMin *= 0.9; dataMax *= 1.1; } 
+                else { dataMax = defaultMax || 1; } // 避免0-0范围
             }
             minInput.min = dataMin; minInput.max = dataMax;
             maxInput.min = dataMin; maxInput.max = dataMax;
             minInput.value = dataMin;
             maxInput.value = dataMax;
         }
-        // 确保min slider value不大于max slider value
         if (Number(minInput.value) > Number(maxInput.value)) {
             maxInput.value = minInput.value;
         }
     }
 
-    // 填充地图控制区域的下拉框选项并初始化滑块
     function populateMapControls() {
         if (!mapRegionSelect || !mapMetricSelect) return;
 
-        // 填充地区选择下拉框
         mapRegionSelect.innerHTML = '<option value="all">所有地区</option>';
         allMapRegions.forEach(region => {
             const option = document.createElement('option');
@@ -208,7 +200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             mapRegionSelect.appendChild(option);
         });
 
-        // 定义可选的地图着色指标
         const availableMetricsForMap = [
             { value: '教育经费合计', text: '教育经费合计 (元)' },
             { value: '一本率', text: '一本率 (%)' }, 
@@ -216,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { value: '师生比', text: '师生比' }, 
             { value: '高等学校入学率', text: '高等学校入学率 (%)' }
         ];
-        mapMetricSelect.innerHTML = ''; // 清空现有选项
+        mapMetricSelect.innerHTML = '';
         availableMetricsForMap.forEach(metricInfo => {
             // 确保该指标在数据中至少有一个有效数值才添加到下拉框
             if (mapRawData.some(d => d[metricInfo.value] !== null && !isNaN(d[metricInfo.value]))) {
@@ -226,20 +217,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         if (mapMetricSelect.options.length > 0) {
-            mapMetricSelect.value = mapMetricSelect.options[0].value; // 默认选中第一个可用指标
+            mapMetricSelect.value = mapMetricSelect.options[0].value;
         }
 
-        // 初始化所有筛选滑块
-        initializeSlider(mapExpenditureMinInput, mapExpenditureMaxInput, '教育经费合计', false, 0, 1000000000); // 经费默认范围较大
+        initializeSlider(mapExpenditureMinInput, mapExpenditureMaxInput, '教育经费合计', false, 0, 1000000000);
         initializeSlider(mapTier1RateMinInput, mapTier1RateMaxInput, '一本率', true, 0, 100);
         initializeSlider(mapKeySchoolMinInput, mapKeySchoolMaxInput, '重点中学比例', true, 0, 100);
-        initializeSlider(mapTsRatioMinInput, mapTsRatioMaxInput, '师生比', false, 5, 30); // 师生比参考范围
+        initializeSlider(mapTsRatioMinInput, mapTsRatioMaxInput, '师生比', false, 5, 30);
         initializeSlider(mapHigherEdRateMinInput, mapHigherEdRateMaxInput, '高等学校入学率', true, 0, 100);
         
-        updateGlobalMapRangeDisplays(); // 更新滑块范围的文本显示
+        updateGlobalMapRangeDisplays();
     }
 
-    // 更新全局地图的显示
     function updateGlobalMap() {
         if (mapRawData.length === 0 || !mapMetricSelect || mapMetricSelect.options.length === 0) {
             if(mainMapChart && !mainMapChart.isDisposed()) mainMapChart.clear();
@@ -247,10 +236,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const selectedMetricToColor = mapMetricSelect.value; // 当前选中的着色指标
-        const selectedRegionToHighlight = mapRegionSelect.value; // 当前选中的高亮地区
+        const selectedMetricToColor = mapMetricSelect.value;
+        const selectedRegionToHighlight = mapRegionSelect.value;
 
-        // 从滑块获取当前的筛选范围
         const filters = {
             '教育经费合计': [Number(mapExpenditureMinInput?.value), Number(mapExpenditureMaxInput?.value)],
             '一本率': [Number(mapTier1RateMinInput?.value), Number(mapTier1RateMaxInput?.value)],
@@ -258,61 +246,52 @@ document.addEventListener('DOMContentLoaded', async () => {
             '师生比': [Number(mapTsRatioMinInput?.value), Number(mapTsRatioMaxInput?.value)],
             '高等学校入学率': [Number(mapHigherEdRateMinInput?.value), Number(mapHigherEdRateMaxInput?.value)]
         };
-        // 为filter的max值设置一个非常大的数，如果滑块本身没有值或解析为0/NaN (针对非百分比)
         if (isNaN(filters['教育经费合计'][1]) || filters['教育经费合计'][1] === 0 ) filters['教育经费合计'][1] = Infinity;
         if (isNaN(filters['师生比'][1]) || filters['师生比'][1] === 0 ) filters['师生比'][1] = Infinity;
 
-
-        // 根据所有滑块的范围筛选数据
         const filteredDataForMapDisplay = mapRawData.filter(d => {
             for (const key in filters) {
-                if (d[key] === null || typeof d[key] === 'undefined' || isNaN(d[key])) { // 跳过空值或NaN值数据点的该项筛选
+                if (d[key] === null || typeof d[key] === 'undefined' || isNaN(d[key])) {
                     continue; 
                 }
                 const val = d[key];
                 const [min, max] = filters[key];
-                // 确保min和max是有效数字，否则不应用此项筛选
                 if (isNaN(min) || isNaN(max)) continue; 
                 if (val < min || val > max) return false; 
             }
             return true;
         });
         
-        // 准备ECharts地图系列所需的数据格式
         const chartDataForMap = filteredDataForMapDisplay.map(d => ({
-            name: d.mapName, // 使用映射后的GeoJSON地区名
-            value: d[selectedMetricToColor], // 当前着色指标的值
-            allData: d // 保留完整数据以便tooltip显示
+            name: d.mapName,
+            value: d[selectedMetricToColor],
+            allData: d 
         })).filter(d => d.value !== null && !isNaN(d.value)); // 确保着色值有效
         
-        // 计算visualMap的min/max范围
-        let minVal = 0, maxVal = 100; // 默认范围，尤其适用于百分比
+        let minVal = 0, maxVal = 100; 
         if (chartDataForMap.length > 0) {
             const values = chartDataForMap.map(d => d.value);
             minVal = Math.min(...values);
             maxVal = Math.max(...values);
         } else { 
-            // 如果筛选后无数据，则尝试基于原始数据（未筛选）的当前指标计算范围
             const originalValuesForMetric = mapRawData.map(d => d[selectedMetricToColor]).filter(v => v !== null && !isNaN(v));
             if (originalValuesForMetric.length > 0) {
                 minVal = Math.min(...originalValuesForMetric);
                 maxVal = Math.max(...originalValuesForMetric);
-            } else { // 如果连原始数据都没有该指标，则使用默认或猜测范围
+            } else { 
                 minVal = 0; 
                 maxVal = (selectedMetricToColor.includes("率") || selectedMetricToColor.includes("比例")) ? 100 : (selectedMetricToColor === "教育经费合计" ? 100000000 : 30);
             }
         }
 
-        // 避免visualMap的min和max相等导致渲染问题
-        if (minVal === maxVal) {
-            if (minVal === 0) maxVal = 1; // 如果都是0，则设为0-1
-            else { minVal *= 0.9; maxVal *= 1.1; } // 稍微扩展范围
+        if (minVal === maxVal) { // 避免visualMap的min和max相等
+            if (minVal === 0) maxVal = 1;
+            else { minVal *= 0.9; maxVal *= 1.1; }
         }
-        if (minVal > maxVal) { // 确保 min <= max
-            [minVal, maxVal] = [maxVal, minVal]; // Swap if min > max
-            if (minVal === maxVal) maxVal = minVal +1; // 再次确保不相等
+        if (minVal > maxVal) { 
+            [minVal, maxVal] = [maxVal, minVal];
+            if (minVal === maxVal) maxVal = minVal +1;
         }
-
 
         const mapOption = {
             title: { text: `各地区${selectedMetricToColor}概览`, left: 'center', textStyle: { fontSize: 16 } },
@@ -322,13 +301,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (params.data && params.data.allData) {
                         const d = params.data.allData;
                         let tooltipHtml = `<strong>地区: ${d['地区']}</strong><br/>`;
-                        // 从availableMetricsForMap获取顺序和名称，确保tooltip显示所有主要指标
-                        availableMetricsForMap.forEach(metric => {
-                             tooltipHtml += `${metric.text.split(' (')[0]}: ${formatMetricValue(d[metric.value], metric.value)} ${metric.text.includes('(元)') ? '元' : ''}<br/>`;
+                        const availableMetricsForTooltip = [ // 和 populateMapControls 中保持一致或从那里引用
+                            { value: '教育经费合计', text: '教育经费合计 (元)' }, { value: '一本率', text: '一本率 (%)' }, 
+                            { value: '重点中学比例', text: '重点中学比例 (%)' }, { value: '师生比', text: '师生比' }, 
+                            { value: '高等学校入学率', text: '高等学校入学率 (%)' }
+                        ];
+                        availableMetricsForTooltip.forEach(metric => {
+                            tooltipHtml += `${metric.text.split(' (')[0]}: ${formatMetricValue(d[metric.value], metric.value)} ${metric.text.includes('(元)') ? '元' : ''}<br/>`;
                         });
                         return tooltipHtml;
                     }
-                    // 如果没有数据（例如该地区被筛选掉，或GeoJSON中存在但CSV中没有的地区）
                     return `${params.name}<br/>(${selectedMetricToColor}) 无有效数据`;
                 }
             },
@@ -341,25 +323,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             geo: { 
                 map: 'china', 
-                roam: true, // 允许缩放和拖拽
-                label: { show: false }, // 默认不显示地区标签
-                emphasis: { // 高亮状态
+                roam: true,
+                label: { show: false }, 
+                emphasis: { 
                     label: { show: true, color: '#333', fontWeight: 'bold' }, 
                     itemStyle: { areaColor: '#FFD700', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.2)' } 
                 }, 
-                itemStyle: { // 正常状态
+                itemStyle: { 
                     areaColor: '#f3f3f3', borderColor: '#aaa', borderWidth: 0.5 
                 },
-                selectedMode: 'single', // 允许单选高亮
-                select: { // 选中状态
-                    label: { show: true, color: '#fff' }, //选中时标签白色
-                    itemStyle: { areaColor: '#c00000' } // 选中时区域深红色
+                selectedMode: 'single',
+                select: { 
+                    label: { show: true, color: '#fff' }, 
+                    itemStyle: { areaColor: '#c00000' } 
                 }
             },
             series: [{ 
                 name: selectedMetricToColor, 
                 type: 'map', 
-                geoIndex: 0, //关联到第一个geo组件
+                geoIndex: 0, 
                 data: chartDataForMap 
             }]
         };
@@ -367,25 +349,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             mainMapChart.setOption(mapOption, true); // true表示不合并，清除之前的配置
         }
         
-
-        // 处理地图区域高亮和选中状态
         if(mainMapChart && !mainMapChart.isDisposed()){
-            mainMapChart.dispatchAction({ type: 'downplay' }); // 先取消所有高亮/选中
+            mainMapChart.dispatchAction({ type: 'downplay' }); 
             if (selectedRegionToHighlight !== 'all') {
                 const geoRegionName = getGeoMapRegionName(selectedRegionToHighlight);
                 mainMapChart.dispatchAction({ type: 'highlight', seriesIndex: 0, name: geoRegionName });
                 mainMapChart.dispatchAction({ type: 'select', seriesIndex: 0, name: geoRegionName });
-                mainMapChart.dispatchAction({ type: 'showTip', seriesIndex: 0, name: geoRegionName }); // 触发选中地区的tooltip
-            } else {
-                // 如果选择 "所有地区"，确保取消任何已选中的区域
-                // 'unselect' 需要指定之前选中的name，或者更简单的方式是重新设置一个空的选中项
-                // 但由于selectedMode: 'single', downplay应该已经处理了大部分
-                // 如果仍有问题，可以遍历所有地区进行unselect，或者记录上次选中的项
+                mainMapChart.dispatchAction({ type: 'showTip', seriesIndex: 0, name: geoRegionName });
             }
         }
     }
 
-    // 整体初始化流程
     async function initGlobalMap() {
         if(mainMapChart && !mainMapChart.isDisposed()){
             mainMapChart.showLoading({ text: '全局地图数据加载中...' });
@@ -395,35 +369,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             mainMapChart.hideLoading();
         }
         
-
         if (dataLoaded && mapRawData.length > 0) {
-            populateMapControls(); // 填充控件
-            updateGlobalMap();     // 首次渲染地图
+            populateMapControls();
+            updateGlobalMap();
 
-            // 绑定事件监听器
             if(mapMetricSelect) mapMetricSelect.addEventListener('change', updateGlobalMap);
             if(mapRegionSelect) mapRegionSelect.addEventListener('change', updateGlobalMap);
 
             const allSliderInputs = [
-                mapExpenditureMinInput, mapExpenditureMaxInput,
-                mapTier1RateMinInput, mapTier1RateMaxInput,
-                mapKeySchoolMinInput, mapKeySchoolMaxInput,
-                mapTsRatioMinInput, mapTsRatioMaxInput,
+                mapExpenditureMinInput, mapExpenditureMaxInput, mapTier1RateMinInput, mapTier1RateMaxInput,
+                mapKeySchoolMinInput, mapKeySchoolMaxInput, mapTsRatioMinInput, mapTsRatioMaxInput,
                 mapHigherEdRateMinInput, mapHigherEdRateMaxInput
             ];
             allSliderInputs.forEach(input => {
                 if (input) {
-                    input.addEventListener('input', () => { // 'input'事件实时响应滑块拖动
-                        updateGlobalMapRangeDisplays(); // 实时更新范围文本
-                        // updateGlobalMap(); // 实时更新地图，如果性能允许
+                    input.addEventListener('input', () => { 
+                        updateGlobalMapRangeDisplays();
                     });
-                    input.addEventListener('change', () => { // 'change'事件在释放滑块后触发
-                        updateGlobalMap(); // 在滑块操作结束后更新地图，性能更优
+                    input.addEventListener('change', () => { 
+                        updateGlobalMap();
                     });
                 }
             });
 
-            // 窗口大小调整时重绘图表
             window.addEventListener('resize', () => {
                 if (mainMapChart && !mainMapChart.isDisposed()) mainMapChart.resize();
             });
@@ -433,5 +401,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 如果dataLoaded为false，错误信息已在loadMapData中显示
     }
 
-    initGlobalMap(); // 执行初始化
+    initGlobalMap();
 });
