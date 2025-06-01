@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教育数据多维分析平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>教育数据多维分析平台</h1>
+        <p>探索教育数据中的洞见</p>
+    </header>
+
+    <div class="main-content-wrapper">
+        <section id="global-map-section" class="content-section">
+            <h2>中国教育数据概览地图</h2>
+            <div class="controls map-controls">
+                <div>
+                    <label for="map-metric-select">地图着色指标:</label>
+                    <select id="map-metric-select">
+                        </select>
+                </div>
+                <div>
+                    <label for="map-region-select">高亮地区:</label>
+                    <select id="map-region-select">
+                        <option value="all">所有地区</option>
+                        </select>
+                </div>
+
+                <hr style="width:100%; border-top: 1px solid #eee; margin: 10px 0;">
+                <p style="width:100%; font-size:0.9em; color:#555; margin-bottom:5px;">数据范围筛选 (地图):</p>
+
+                <div>
+                    <label for="map-expenditure-filter-min">教育经费合计:</label>
+                    <div class="slider-group">
+                        <input type="range" id="map-expenditure-filter-min" step="1">
+                        <input type="range" id="map-expenditure-filter-max" step="1">
+                        <span id="map-expenditure-range-display">0 - 0 元</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="map-tier1rate-filter-min">一本率:</label>
+                    <div class="slider-group">
+                        <input type="range" id="map-tier1rate-filter-min" step="0.01">
+                        <input type="range" id="map-tier1rate-filter-max" step="0.01">
+                        <span id="map-tier1rate-range-display">0% - 100%</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="map-keyschool-filter-min">重点中学比例:</label>
+                    <div class="slider-group">
+                        <input type="range" id="map-keyschool-filter-min" step="0.1">
+                        <input type="range" id="map-keyschool-filter-max" step="0.1">
+                        <span id="map-keyschool-range-display">0% - 100%</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="map-tsratio-filter-min">师生比:</label>
+                    <div class="slider-group">
+                        <input type="range" id="map-tsratio-filter-min" step="0.01">
+                        <input type="range" id="map-tsratio-filter-max" step="0.01">
+                        <span id="map-tsratio-range-display">0 - 0</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="map-higheredrate-filter-min">高等学校入学率:</label>
+                    <div class="slider-group">
+                        <input type="range" id="map-higheredrate-filter-min" step="0.1">
+                        <input type="range" id="map-higheredrate-filter-max" step="0.1">
+                        <span id="map-higheredrate-range-display">0% - 100%</span>
+                    </div>
+                </div>
+            </div>
+            <div id="main-map-container" class="chart-container">
+                <p style="text-align:center; padding-top:50px;">全局地图加载中...</p>
+            </div>
+        </section>
+
+        <section id="analytical-charts-section" class="content-section">
+            <nav class="analytical-charts-navigation">
+                <button class="nav-button active" data-view-id="q1-scatter-view">支出与入学率 (Q1)</button>
+                <button class="nav-button" data-view-id="q2-scatter-view">师生比与重点中学比例 (Q2)</button>
+                <button class="nav-button" data-view-id="q3-scatter-view">一本率与重点中学比例 (Q3)</button>
+            </nav>
+
+            <div id="q1-scatter-view" class="visualization-view active-view">
+                <h3>问题1: 地区教育入学率与教育支出之间的关系</h3>
+                <div class="controls q1-scatter-controls">
+                    <div>
+                        <label for="expenditure-filter-q1-min">教育经费合计范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="expenditure-filter-q1-min" step="1000">
+                            <input type="range" id="expenditure-filter-q1-max" step="1000">
+                            <span id="expenditure-range-display-q1"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="enrollment-filter-q1-min">高等学校入学率范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="enrollment-filter-q1-min" step="0.1">
+                            <input type="range" id="enrollment-filter-q1-max" step="0.1">
+                            <span id="enrollment-range-display-q1"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="scatter-chart-container-q1" class="chart-container">
+                    <p style="text-align:center; padding-top:50px;">Q1 散点图加载中...</p>
+                </div>
+            </div>
+
+            <div id="q2-scatter-view" class="visualization-view">
+                <h3>问题2: 师生比与重点中学比例的关联性</h3>
+                <div class="controls q2-scatter-controls">
+                    <div>
+                        <label for="tsratio-filter-q2-min">师生比范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="tsratio-filter-q2-min" step="0.01">
+                            <input type="range" id="tsratio-filter-q2-max" step="0.01">
+                            <span id="tsratio-range-display-q2">0 - 0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="keyschool-filter-q2-min">重点中学比例范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="keyschool-filter-q2-min" step="0.1">
+                            <input type="range" id="keyschool-filter-q2-max" step="0.1">
+                            <span id="keyschool-range-display-q2">0% - 0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="scatter-chart-container-q2" class="chart-container">
+                    <p style="text-align:center; padding-top:50px;">Q2 散点图加载中...</p>
+                </div>
+            </div>
+
+            <div id="q3-scatter-view" class="visualization-view">
+                <h3>问题3: 地区一本率与重点中学比例的关系</h3>
+                <div class="controls q3-scatter-controls">
+                    <div>
+                        <label for="tier1rate-filter-q3-min">一本率范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="tier1rate-filter-q3-min" step="0.01">
+                            <input type="range" id="tier1rate-filter-q3-max" step="0.01">
+                            <span id="tier1rate-range-display-q3">0% - 0%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="keyschool-filter-q3-min">重点中学比例范围:</label>
+                        <div class="slider-group">
+                            <input type="range" id="keyschool-filter-q3-min" step="0.1">
+                            <input type="range" id="keyschool-filter-q3-max" step="0.1">
+                            <span id="keyschool-range-display-q3">0% - 0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="scatter-chart-container-q3" class="chart-container">
+                    <p style="text-align:center; padding-top:50px;">Q3 散点图加载中...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 教育数据可视化项目</p>
+    </footer>
+
+    <script src="js/global_map.js"></script>
+    <script src="js/visualization_q1_scatter.js"></script>
+    <script src="js/visualization_q2_scatter.js"></script>
+    <script src="js/visualization_q3_scatter.js"></script>
+    <script src="js/main_app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const views = document.querySelectorAll('.visualization-view');
+
+            // 确保至少有一个视图是激活的（通常是第一个）
+            const firstViewId = navButtons.length > 0 ? navButtons[0].getAttribute('data-view-id') : null;
+            if (firstViewId) {
+                document.getElementById(firstViewId)?.classList.add('active-view');
+                navButtons[0]?.classList.add('active');
+            }
+
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    views.forEach(view => view.classList.remove('active-view'));
+
+                    this.classList.add('active');
+                    const viewId = this.getAttribute('data-view-id');
+                    document.getElementById(viewId).classList.add('active-view');
+                });
+            });
+
+            // 注意：此处的ECharts初始化代码只是一个非常简单的占位符示例。
+            // 您实际的图表初始化逻辑应该在各自的JS文件 (global_map.js, visualization_q1_scatter.js等) 中。
+            // 如果您的JS文件已经处理了图表初始化，则不需要以下ECharts示例代码。
+            // 此处仅为防止页面在没有其他JS时显得完全空白。
+            /*
+            document.querySelectorAll('.chart-container').forEach(container => {
+                if (container.id && !echarts.getInstanceByDom(container)) { // 检查是否已初始化
+                    try {
+                        var myChart = echarts.init(container);
+                        var option = {
+                            title: {
+                                text: container.querySelector('p') ? container.querySelector('p').innerText.replace(' 加载中...', '') : '图表',
+                                left: 'center',
+                                top: 'center',
+                                textStyle: { color: '#888', fontSize: 16 }
+                            },
+                            grid: { top: '5%', left: '5%', right: '5%', bottom: '5%', containLabel: true },
+                            xAxis: { show: false },
+                            yAxis: { show: false },
+                            series: []
+                        };
+                        myChart.setOption(option);
+                        if(container.querySelector('p')) container.querySelector('p').style.display = 'none';
+                    } catch (e) {
+                        console.error("ECharts init failed for: " + container.id, e);
+                        if(container.querySelector('p')) container.querySelector('p').innerText = '图表加载失败';
+                    }
+                } else if (container.id && echarts.getInstanceByDom(container) && container.querySelector('p')) {
+                    // 如果已由其他脚本初始化，隐藏加载文字
+                     container.querySelector('p').style.display = 'none';
+                }
+            });
+            */
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+/* 基础页面样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-image: url('../images/p6.webp'); 
+    background-repeat: repeat;               
+    background-color: #f4f7f6;             
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+    background-color: #fff; /* Kept white to stand out against the pattern */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #0056b3;
+    margin-bottom: 8px;
+    font-size: 2em;
+}
+
+h2 { /* 内容区域的主标题，如 "中国教育数据概览地图" */
+    color: #0056b3;
+    font-size: 1.5em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+h3 { /* 分析视图内部的子标题 */
+    color: #333;
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+p {
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* main不再直接控制最大宽度，由 .main-content-wrapper 控制 */
+main { /* Though you don't have a <main> tag in the HTML, this rule would apply if you did */
+    margin: 0 auto;
+}
+
+/* 主内容区垂直布局容器 */
+.main-content-wrapper {
+    display: flex;
+    flex-direction: column; /* 核心：地图区和分析区垂直排列 */
+    gap: 25px; /* 上下区域间距 */
+    max-width: 1200px; /* 整体内容区最大宽度并居中 */
+    margin: 0 auto;
+}
+
+/* 全局地图区域和分析图表区域的通用容器样式 */
+.content-section {
+    background-color: #fff; /* Kept white to stand out against the pattern */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#global-map-section {
+    width: 100%; /* 占据整行 */
+    display: flex;
+    flex-direction: column; /* 内部元素垂直排列 (标题、控件、地图容器) */
+}
+
+#analytical-charts-section {
+    width: 100%; /* 占据整行 */
+    display: flex;
+    flex-direction: column; /* 内部元素垂直排列 (导航、视图容器) */
+}
+
+
+/* 分析图表区的Tab导航样式 */
+.analytical-charts-navigation {
+    display: flex;
+    justify-content: flex-start; /* 按钮靠左对齐 */
+    gap: 0; /* 按钮间无间隔，通过margin-right实现重叠 */
+    margin-bottom: 20px;
+    border-bottom: 2px solid #0056b3; /* 导航底部的蓝色实线 */
+}
+
+.nav-button {
+    padding: 10px 18px;
+    font-size: 0.95em;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-bottom: none; /* 底部边框由 .analytical-charts-navigation 的 border-bottom 提供 */
+    background-color: #f8f9fa;
+    border-radius: 6px 6px 0 0; /* 顶部圆角形成tab效果 */
+    margin-right: -1px; /* 实现边框重叠效果 */
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-button:hover {
+    background-color: #e0e0e0;
+    border-color: #bbb;
+}
+
+.nav-button.active { /* 当前激活的导航按钮 */
+    background-color: #0056b3;
+    color: #fff;
+    border-color: #0056b3 #0056b3 #0056b3; /* 激活时三边(上左右)边框同色 */
+    font-weight: bold;
+    position: relative; /* 用于z-index确保边框显示在其他按钮之上 */
+    z-index: 1;
+}
+
+/* 可视化视图容器 (用于Tab切换显示不同图表) */
+.visualization-view {
+    display: none; /* 默认隐藏 */
+    border: 1px solid #ddd;
+    border-top: none; /* 顶部边框与导航栏的底线融合 */
+    padding: 20px;   /* 视图内部内容区的内边距 */
+    border-radius: 0 0 6px 6px; /* 底部圆角，配合导航按钮 */
+    background-color: #fff; /* Kept white to make content clear over body pattern */
+}
+
+.visualization-view.active-view { /* 当前显示的视图 */
+    display: block;
+    animation: fadeInView 0.3s ease-out; /* 淡入动画效果 */
+}
+
+@keyframes fadeInView {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 通用筛选控件区域样式 */
+.controls {
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: #f9f9f9; /* Light background for controls, stands out on white .content-section */
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-wrap: wrap; /* 控件多时自动换行 */
+    gap: 15px; /* 控件组之间的间距 */
+    align-items: center; /* 控件垂直居中对齐 */
+}
+
+.controls label {
+    font-weight: bold;
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+
+.controls select,
+.controls input[type="range"] { /* 下拉框和范围滑块的通用样式 */
+    padding: 7px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.controls select {
+    min-width: 120px; /* 下拉框最小宽度 */
+}
+
+/* input[type="range"] 范围滑块样式重置与自定义 */
+input[type="range"] {
+    width: 150px; /* 滑块轨道宽度 */
+    -webkit-appearance: none; /* 移除浏览器默认外观 (Chrome, Safari, Edge) */
+    appearance: none; /* 移除浏览器默认外观 (Firefox) */
+    background: #ddd; /* 滑块轨道背景色 */
+    outline: none; /* 移除焦点时的轮廓 */
+    height: 8px; /* 滑块轨道高度 */
+    border-radius: 5px; /* 滑块轨道圆角 */
+    cursor: pointer;
+    margin: 0 5px; /* 滑块与其他元素间距 */
+}
+
+/* Webkit (Chrome, Safari, Edge) 浏览器滑块拖动按钮样式 */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; /* 拖动按钮宽度 */
+    height: 16px; /* 拖动按钮高度 */
+    border-radius: 50%; /* 圆形按钮 */
+    background: #007bff; /* 拖动按钮背景色 */
+    cursor: pointer;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2); /* 轻微阴影 */
+}
+
+/* Firefox 浏览器滑块拖动按钮样式 */
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: none; /* Firefox 可能需要移除边框 */
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+/* 滑块组 (label + 两个滑块 + span) 的容器样式 */
+.slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 组内元素间距 */
+}
+
+.slider-group span { /* 用于显示滑块范围的文本 */
+    font-size: 0.85em;
+    color: #555;
+    white-space: nowrap; /* 防止文本换行 */
+    min-width: 100px; /* 确保有足够宽度显示范围文本 */
+    text-align: right; /* 文本靠右对齐，可根据需要调整 */
+}
+
+/* 通用图表容器样式 */
+.chart-container {
+    height: 450px; /* 图表固定高度 */
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #fff; /* Kept white for chart readability */
+    padding: 10px; /* 内边距，给图表留出呼吸空间 */
+    display: flex; /* 用于居中内部的占位符文本或加载提示 */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* 防止图表内容溢出 */
+    width: 100%; /* 宽度撑满其父容器 */
+    box-sizing: border-box; /* padding 和 border 不会增加总宽度 */
+}
+
+/* 页脚 */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    color: #777;
+    font-size: 0.85em;
+    border-top: 1px solid #eee;
+    background-color: #fff; /* Optional: Give footer a solid background too */
+                           /* Or remove/comment this to let body pattern show, if desired */
+}
