@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isNaN(numValue) && typeof value === 'string' && value.trim() === '') return forDisplay ? '无数据' : null;
         if (isNaN(numValue)) return forDisplay ? String(value) : value; 
 
-        const percentageMetrics = ["一本率", "重点中学比例", "高等学校入学率"];
+        const percentageMetrics = ["一本率", "重点中学比例", "高等教育毛入学率"];
         if (percentageMetrics.includes(metricName)) {
             return numValue.toFixed(2) + (forDisplay ? '%' : '');
         }
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (header === '地区') {
                         obj['地区'] = val;
                         obj['mapName'] = getGeoMapRegionName(val);
-                    } else if (['一本率', '重点中学比例', '高等学校入学率'].includes(header)) {
+                    } else if (['一本率', '重点中学比例', '高等教育毛入学率'].includes(header)) {
                         obj[header] = isEmpty ? null : parseFloat(val.replace('%', ''));
                     } else if (header === '师生比') {
                         obj[header] = isEmpty ? null : parseFloat(val);
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { value: '一本率', text: '一本率 (%)' }, 
             { value: '重点中学比例', text: '重点中学比例 (%)' },
             { value: '师生比', text: '师生比' }, 
-            { value: '高等学校入学率', text: '高等学校入学率 (%)' }
+            { value: '高等教育毛入学率', text: '高等教育毛入学率 (%)' }
         ];
         mapMetricSelect.innerHTML = '';
         availableMetricsForMap.forEach(metricInfo => {
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initializeSlider(mapTier1RateMinInput, mapTier1RateMaxInput, '一本率', true, 0, 100);
         initializeSlider(mapKeySchoolMinInput, mapKeySchoolMaxInput, '重点中学比例', true, 0, 100);
         initializeSlider(mapTsRatioMinInput, mapTsRatioMaxInput, '师生比', false, 5, 30);
-        initializeSlider(mapHigherEdRateMinInput, mapHigherEdRateMaxInput, '高等学校入学率', true, 0, 100);
+        initializeSlider(mapHigherEdRateMinInput, mapHigherEdRateMaxInput, '高等教育毛入学率', true, 0, 100);
         
         updateGlobalMapRangeDisplays();
     }
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             '一本率': [Number(mapTier1RateMinInput?.value), Number(mapTier1RateMaxInput?.value)],
             '重点中学比例': [Number(mapKeySchoolMinInput?.value), Number(mapKeySchoolMaxInput?.value)],
             '师生比': [Number(mapTsRatioMinInput?.value), Number(mapTsRatioMaxInput?.value)],
-            '高等学校入学率': [Number(mapHigherEdRateMinInput?.value), Number(mapHigherEdRateMaxInput?.value)]
+            '高等教育毛入学率': [Number(mapHigherEdRateMinInput?.value), Number(mapHigherEdRateMaxInput?.value)]
         };
         if (isNaN(filters['教育经费合计'][1]) || filters['教育经费合计'][1] === 0 ) filters['教育经费合计'][1] = Infinity;
         if (isNaN(filters['师生比'][1]) || filters['师生比'][1] === 0 ) filters['师生比'][1] = Infinity;
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const availableMetricsForTooltip = [ // 和 populateMapControls 中保持一致或从那里引用
                             { value: '教育经费合计', text: '教育经费合计 (元)' }, { value: '一本率', text: '一本率 (%)' }, 
                             { value: '重点中学比例', text: '重点中学比例 (%)' }, { value: '师生比', text: '师生比' }, 
-                            { value: '高等学校入学率', text: '高等学校入学率 (%)' }
+                            { value: '高等教育毛入学率', text: '高等教育毛入学率 (%)' }
                         ];
                         availableMetricsForTooltip.forEach(metric => {
                             tooltipHtml += `${metric.text.split(' (')[0]}: ${formatMetricValue(d[metric.value], metric.value)} ${metric.text.includes('(元)') ? '元' : ''}<br/>`;

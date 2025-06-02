@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const expenditureRangeDisplayQ1 = document.getElementById('expenditure-range-display-q1'); // X轴: 教育经费合计
     const enrollmentMinInputQ1 = document.getElementById('enrollment-filter-q1-min');
     const enrollmentMaxInputQ1 = document.getElementById('enrollment-filter-q1-max');
-    const enrollmentRangeDisplayQ1 = document.getElementById('enrollment-range-display-q1'); // Y轴: 高等学校入学率
+    const enrollmentRangeDisplayQ1 = document.getElementById('enrollment-range-display-q1'); 
 
     let q1RawData = []; 
 
@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (cleanHeader === '地区') {
                         obj['地区'] = val;
-                    } else if (cleanHeader === '高等学校入学率') {
-                        obj['高等学校入学率'] = isEmpty ? null : parseFloat(val.replace('%', ''));
+                    } else if (cleanHeader === '高等教育毛入学率') {
+                        obj['高等教育毛入学率'] = isEmpty ? null : parseFloat(val.replace('%', ''));
                     } else if (cleanHeader === '教育经费合计') {
                         obj['教育经费合计'] = isEmpty ? null : Number(val);
                     } else {
@@ -55,15 +55,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
                 // 确保散点图需要的核心数据存在
-                if (obj.hasOwnProperty('教育经费合计') && obj.hasOwnProperty('高等学校入学率')) {
+                if (obj.hasOwnProperty('教育经费合计') && obj.hasOwnProperty('高等教育毛入学率')) {
                     return obj;
                 }
                 return null;
-            }).filter(d => d && d['地区'] && d['教育经费合计'] !== null && d['高等学校入学率'] !== null);
+            }).filter(d => d && d['地区'] && d['教育经费合计'] !== null && d['高等教育毛入学率'] !== null);
 
             console.log("Q1散点图: q1.csv 数据加载并处理完毕", q1RawData.length);
             if (q1RawData.length === 0) {
-                console.warn("Q1散点图: 加载后数据为空，请检查q1.csv（应含'地区', '高等学校入学率', '教育经费合计'）。");
+                console.warn("Q1散点图: 加载后数据为空，请检查q1.csv（应含'地区', '高等教育毛入学率', '教育经费合计'）。");
             }
             return true;
         } catch (error) {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const expenditures = q1RawData.map(d => d['教育经费合计']).filter(v => v !== null && !isNaN(v));
-        const enrollments = q1RawData.map(d => d['高等学校入学率']).filter(v => v !== null && !isNaN(v));
+        const enrollments = q1RawData.map(d => d['高等教育毛入学率']).filter(v => v !== null && !isNaN(v));
 
         const minE_data = expenditures.length > 0 ? Math.min(...expenditures) : 0;
         const maxE_data = expenditures.length > 0 ? Math.max(...expenditures) : defaultExpenditureMax;
@@ -141,12 +141,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const filteredData = q1RawData.filter(d =>
             d['教育经费合计'] >= minExp && d['教育经费合计'] <= maxExp &&
-            d['高等学校入学率'] >= minEnroll && d['高等学校入学率'] <= maxEnroll
+            d['高等教育毛入学率'] >= minEnroll && d['高等教育毛入学率'] <= maxEnroll
         );
 
         const scatterData = filteredData.map(d => ({
             name: d['地区'],
-            value: [d['教育经费合计'], d['高等学校入学率']],
+            value: [d['教育经费合计'], d['高等教育毛入学率']],
             allData: d 
         }));
 
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const scatterOption = {
             title: {
-                text: '地区教育经费合计与高等学校入学率关系',
+                text: '地区教育经费合计与高等教育毛入学率关系',
                 left: 'center',
                 textStyle: { fontSize: 16 }
             },
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (!params.data || !params.data.value) return '';
                     return `<strong>地区: ${params.name}</strong><br/>
                             教育经费合计: ${formatAxisNumber(params.value[0])} 元<br/>
-                            高等学校入学率: ${params.value[1].toFixed(2)}%`;
+                            高等教育毛入学率: ${params.value[1].toFixed(2)}%`;
                 }
             },
             xAxis: {
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 axisLabel: { formatter: val => formatAxisNumber(val) }
             },
             yAxis: {
-                name: '高等学校入学率 (%)',
+                name: '高等教育毛入学率 (%)',
                 type: 'value',
                 scale: true,
                 axisLabel: { formatter: '{value}%' },
