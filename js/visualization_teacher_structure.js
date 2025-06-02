@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if (header === '地区') {
                             entry[header] = val;
                         } else {
-                            entry[header] = 0; // Default to 0 if data is missing for a category
+                            entry[header] = 0; // 确保所有非地区字段都有值
                         }
                     });
                     return entry['地区'] && entry['地区'] !== '总计' ? entry : null;
@@ -187,12 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (allRegionsForPies.length > 0) {
                 updatePieCharts(allRegionsForPies[0]);
             } else {
-                 updatePieCharts(null); // Explicitly update with no region if none are available
+                 updatePieCharts(null); // 显示占位符
             }
         }
 
         function updatePieCharts(regionName) {
-            // Ensure pie chart instances are (re)initialized if necessary
             if (educationPieDom && (!teacherEducationPieChart || teacherEducationPieChart.isDisposed())) {
                 teacherEducationPieChart = echarts.init(educationPieDom);
                 window.teacherEducationPieChart = teacherEducationPieChart;
@@ -231,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Education Pie Chart
+            // 教育背景饼图
             if (teacherEducationPieChart && !teacherEducationPieChart.isDisposed()) {
                 const educationPieData = educationLevels.map(level => ({
                     name: level,
@@ -257,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            // Title Pie Chart
+            // 职称饼图
             if (teacherTitlePieChart && !teacherTitlePieChart.isDisposed()) {
                 const titlePieData = titles.map(title => ({
                     name: title,
@@ -284,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (await loadData()) {
-            updateChart(); // This will also call updatePieCharts for the initially selected region
+            updateChart(); // 初始加载图表
             stackBySelect.addEventListener('change', updateChart);
             valueTypeSelect.addEventListener('change', updateChart);
             if (teacherPieRegionSelect) {
@@ -310,11 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (teacherPieRegionSelect) teacherPieRegionSelect.value = selectedRegion;
                         updatePieCharts(selectedRegion);
                     } else if (selectedRegion === 'all' && allRegionsForPies.length > 0) {
-                        // Optionally update pie charts to the first region or show a general placeholder
+                        // 如果选择了“全部”，则默认选择第一个地区
                         if (teacherPieRegionSelect) teacherPieRegionSelect.value = allRegionsForPies[0];
-                        updatePieCharts(allRegionsForPies[0]); // Or updatePieCharts(null) for placeholder
+                        updatePieCharts(allRegionsForPies[0]); // 使用第一个地区的数据更新饼图
                     } else {
-                        updatePieCharts(null); // Show placeholder if region is not in pie data or 'all' is selected without a default
+                        updatePieCharts(null); // 显示占位符
                     }
                 }
             });

@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (uni['985'] === '1') { aggregatedData[province].keyProjects['985']++; isKey = true;}
                     if (uni['211'] === '1') { aggregatedData[province].keyProjects['211']++; isKey = true;}
                     if (uni['双一流'] === '双一流') { aggregatedData[province].keyProjects['双一流']++; isKey = true;}
-                    if (!isKey && (uni['985'] === '2' || uni['211'] === '2' || uni['双一流'] !== '双一流') ) { // Ensure it's explicitly not a key project or data is missing for key projects
+                    if (!isKey && (uni['985'] === '2' || uni['211'] === '2' || uni['双一流'] !== '双一流') ) { 
                         aggregatedData[province].keyProjects['非重点']++;
-                    } else if (!isKey && !uni['985'] && !uni['211'] && !uni['双一流']) { // If all key project fields are empty, assume non-key
+                    } else if (!isKey && !uni['985'] && !uni['211'] && !uni['双一流']) { 
                         aggregatedData[province].keyProjects['非重点']++;
                     }
                 });
@@ -246,11 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (header === '985' || header === '211') {
                         if (cellValue === '1') cellValue = '是';
                         else if (cellValue === '2') cellValue = '否';
-                        // Keep original if not 1 or 2, or show '-' if empty
+                        // 如果 cellValue 为空或其他值，保持为 '否'
                     } else if (header === '双一流') {
                         if (cellValue === '双一流') cellValue = '是';
-                        else if (cellValue && cellValue.trim() !== '') cellValue = '否'; // If it has some other value, consider it 'No'
-                        else cellValue = '-'; // If empty
+                        else if (cellValue && cellValue.trim() !== '') cellValue = '否'; // 如果有值但不是双一流，则显示为否
+                        else cellValue = '-'; // 如果没有值，显示为 '-'
                     }
                     tableHTML += `<td>${cellValue}</td>`;
                 });

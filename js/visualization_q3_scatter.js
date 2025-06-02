@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    window.initVisualizationQ3 = async () => { // 暴露给 main_app.js 调用
+    window.initVisualizationQ3 = async () => {
         const scatterDomQ3 = document.getElementById('scatter-chart-container-q3');
         if (!scatterDomQ3) {
             console.error("Q3散点图容器 'scatter-chart-container-q3' 未找到!");
@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Q3 散点图特定控件
         const tier1RateMinInputQ3 = document.getElementById('tier1rate-filter-q3-min');
         const tier1RateMaxInputQ3 = document.getElementById('tier1rate-filter-q3-max');
-        const tier1RateRangeDisplayQ3 = document.getElementById('tier1rate-range-display-q3'); // X轴: 一本率
+        const tier1RateRangeDisplayQ3 = document.getElementById('tier1rate-range-display-q3'); 
         const keySchoolMinInputQ3 = document.getElementById('keyschool-filter-q3-min');
         const keySchoolMaxInputQ3 = document.getElementById('keyschool-filter-q3-max');
-        const keySchoolRangeDisplayQ3 = document.getElementById('keyschool-range-display-q3'); // Y轴: 重点中学比例
+        const keySchoolRangeDisplayQ3 = document.getElementById('keyschool-range-display-q3');
 
         let q3RawData = [];
 
@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!headersLine) throw new Error("Q3散点图CSV(q3.csv)为空或无表头。");
                 
                 const headers = headersLine.split(',').map(h => h.trim().replace(/^[\ufeff]/, ''));
-                // CSV列名，请确保与q3.csv文件一致
                 const regionHeader = "地区"; 
                 const tier1RateHeader = "一本率"; 
                 const keySchoolHeader = "重点中学比例";
@@ -199,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     scale: true,
                     axisLabel: { formatter: '{value}%' },
                     min: 0, 
-                    // max: 100 // 可根据数据自适应或设为100
                 },
                 yAxis: {
                     name: '重点中学比例 (%)',

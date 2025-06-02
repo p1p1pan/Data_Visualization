@@ -5,19 +5,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     const q1ScatterChart = echarts.init(scatterDom);
-    window.q1ScatterChart = q1ScatterChart; // 暴露图表实例，以便main_app调整大小或刷新
+    window.q1ScatterChart = q1ScatterChart; // 暴露图表实例
 
     // Q1 散点图特定控件
     const expenditureMinInputQ1 = document.getElementById('expenditure-filter-q1-min');
     const expenditureMaxInputQ1 = document.getElementById('expenditure-filter-q1-max');
-    const expenditureRangeDisplayQ1 = document.getElementById('expenditure-range-display-q1'); // X轴: 教育经费合计
+    const expenditureRangeDisplayQ1 = document.getElementById('expenditure-range-display-q1'); 
     const enrollmentMinInputQ1 = document.getElementById('enrollment-filter-q1-min');
     const enrollmentMaxInputQ1 = document.getElementById('enrollment-filter-q1-max');
     const enrollmentRangeDisplayQ1 = document.getElementById('enrollment-range-display-q1'); 
 
     let q1RawData = []; 
 
-    // 数字格式化函数，用于坐标轴和tooltip (亿/万)
+    // 数字格式化函数，用于坐标轴和tooltip 
     function formatAxisNumber(num) {
         if (typeof num !== 'number' || isNaN(num)) return 'N/A';
         if (num >= 100000000) return (num / 100000000).toFixed(1) + '亿';
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers.forEach((header, i) => {
                     const val = values[i];
                     const isEmpty = (val === '' || val === null || typeof val === 'undefined');
-                    const cleanHeader = header; // BOM已在headers处理
+                    const cleanHeader = header; 
 
                     if (cleanHeader === '地区') {
                         obj['地区'] = val;
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else if (cleanHeader === '教育经费合计') {
                         obj['教育经费合计'] = isEmpty ? null : Number(val);
                     } else {
-                        obj[cleanHeader.replace(/\s/g, '_')] = val; // 其他列存储
+                        obj[cleanHeader.replace(/\s/g, '_')] = val;
                     }
                 });
                 // 确保散点图需要的核心数据存在
@@ -233,14 +233,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
 
-        // 高亮逻辑 (响应全局地图选择)
+        // 高亮逻辑 
         if(q1ScatterChart && !q1ScatterChart.isDisposed()) {
             q1ScatterChart.dispatchAction({ type: 'downplay', seriesIndex: 0 }); // 先取消所有高亮
             if (window.currentSelectedGlobalRegion && window.currentSelectedGlobalRegion !== 'all') {
                 const dataIndexToHighlight = scatterData.findIndex(item => item.name === window.currentSelectedGlobalRegion);
                 if (dataIndexToHighlight !== -1) {
                     q1ScatterChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: dataIndexToHighlight });
-                    q1ScatterChart.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: dataIndexToHighlight }); // 可选：同时显示tooltip
+                    q1ScatterChart.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: dataIndexToHighlight }); 
                 }
             }
         }
@@ -275,7 +275,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.addEventListener('globalRegionChanged', (event) => {
                 if (event.detail && typeof event.detail.region !== 'undefined') {
-                    // window.currentSelectedGlobalRegion 已经由 main_app.js 更新
                     const q1View = document.getElementById('q1-scatter-view');
                     if (q1View && q1View.classList.contains('active-view') && q1ScatterChart && !q1ScatterChart.isDisposed()) {
                          updateQ1ScatterPlot(); // 重绘以应用高亮

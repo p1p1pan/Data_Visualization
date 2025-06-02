@@ -398,7 +398,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (dataLoaded && mapRawData.length === 0) {
             mapDom.innerHTML = `<p style="text-align:center; padding-top:50px;">全局地图数据已加载，但内容为空或不符合预期格式。</p>`;
         }
-        // 如果dataLoaded为false，错误信息已在loadMapData中显示
     }
 
     initGlobalMap();

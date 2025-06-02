@@ -1,4 +1,3 @@
-// js/grouped_comparison_chart.js
 document.addEventListener('DOMContentLoaded', () => {
     const regionCheckboxContainer = document.getElementById('region-checkboxes-comparison');
     const indicatorCheckboxContainer = document.getElementById('indicator-checkboxes-comparison');

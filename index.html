@@ -312,37 +312,6 @@
     <script src="js/visualization_education_attainment.js"></script>
     <script src="js/main_app.js"></script>
     <script src="js/histogram_comparison.js"></script>
-    <script>
-        // 这个内联脚本可以保持原样，因为它只处理基础的标签页切换逻辑，
-        // main_app.js 会处理更复杂的初始化和图表resize。
-        // 或者，如果你想让 main_app.js 完全接管，可以注释掉这个内联脚本的 `addEventListener` 部分，
-        // 只保留初始激活的逻辑，或者完全由 main_app.js 的 `showAnalyticalView` 在初始化时激活第一个视图。
-        // 为了避免冲突和重复，建议让 main_app.js 的初始化逻辑来处理首次视图激活。
-        // 此处的内联脚本的视图切换逻辑已被 main_app.js 中的 showAnalyticalView 函数覆盖和增强。
-        // 因此，可以简化或移除此内联脚本中的点击事件监听，只确保 main_app.js 正确初始化。
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     const navButtons = document.querySelectorAll('.nav-button');
-        //     const views = document.querySelectorAll('.visualization-view');
 
-        //     // 确保 main_app.js 处理初始激活
-        //     // const firstViewId = navButtons.length > 0 ? navButtons[0].getAttribute('data-view-id') : null;
-        //     // if (firstViewId) {
-        //     //     document.getElementById(firstViewId)?.classList.add('active-view');
-        //     //     navButtons[0]?.classList.add('active');
-        //     // }
-
-
-        //     // navButtons.forEach(button => {
-        //     //     button.addEventListener('click', function () {
-        //     //         navButtons.forEach(btn => btn.classList.remove('active'));
-        //     //         views.forEach(view => view.classList.remove('active-view'));
-
-        //     //         this.classList.add('active');
-        //     //         const viewId = this.getAttribute('data-view-id');
-        //     //         document.getElementById(viewId).classList.add('active-view');
-        //     //     });
-        //     // });
-        // });
-    </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'948fc6c44bbe5ff8',t:'MTc0ODc5MjA4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
