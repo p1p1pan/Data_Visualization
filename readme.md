@@ -24,3 +24,5 @@ project/
 2.右键index.html 点击 Open with Live Server
 
 （正常点击index的话会因为 JS请求资源发起CORS跨域请求被限制，加载不出来数据，直接用VScode里的拓展配置会方便一点）
+
+Node.js 版本可以为v20.16.0+ （没有特别限制版本，如果无法运行可以尝试这两个版本v20.18.0 / 20.16.0）

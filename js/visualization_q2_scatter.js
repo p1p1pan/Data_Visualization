@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    window.initVisualizationQ2 = async () => { // 暴露给 main_app.js 调用
+    window.initVisualizationQ2 = async () => {
         const scatterDomQ2 = document.getElementById('scatter-chart-container-q2');
         if (!scatterDomQ2) {
             console.error("Q2散点图容器 'scatter-chart-container-q2' 未找到!");
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!headersLine) throw new Error("Q2散点图CSV(q2.csv)为空或无表头。");
                 
                 const headers = headersLine.split(',').map(h => h.trim().replace(/^[\ufeff]/, ''));
-                // 假设CSV列顺序: 地区, 师生比, 重点中学比例
                 const regionHeader = headers[0]; 
                 const tsRatioHeader = headers[1]; 
                 const keySchoolHeader = headers[2]; 
