@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupBySelect = document.getElementById('uni-stats-group-by');
         const uniSideInfoRegionSelect = document.getElementById('uni-sideinfo-region-select');
         const uniPieDisplayBySelect = document.getElementById('uni-pie-display-by');
-        const universityTableContainer = document.getElementById('university-summary-table-container'); // Table container
+        const universityTableContainer = document.getElementById('university-summary-table-container');
         
         let universityStatsChart = echarts.getInstanceByDom(chartDom);
         if (!universityStatsChart || universityStatsChart.isDisposed()) {
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let universityData = []; 
         let aggregatedData = {}; 
         let allRegionsForSideInfo = [];
-        let allUniversityCsvHeaders = []; // To store headers from university.csv
+        let allUniversityCsvHeaders = [];
 
         async function loadData() {
             try {
@@ -124,7 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (uni['985'] === '1') { aggregatedData[province].keyProjects['985']++; isKey = true;}
                     if (uni['211'] === '1') { aggregatedData[province].keyProjects['211']++; isKey = true;}
                     if (uni['双一流'] === '双一流') { aggregatedData[province].keyProjects['双一流']++; isKey = true;}
-                    if (!isKey) { aggregatedData[province].keyProjects['非重点']++;}
+                    if (!isKey && (uni['985'] === '2' || uni['211'] === '2' || uni['双一流'] !== '双一流') ) { // Ensure it's explicitly not a key project or data is missing for key projects
+                        aggregatedData[province].keyProjects['非重点']++;
+                    } else if (!isKey && !uni['985'] && !uni['211'] && !uni['双一流']) { // If all key project fields are empty, assume non-key
+                        aggregatedData[province].keyProjects['非重点']++;
+                    }
                 });
             });
         }
@@ -227,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Define headers to display (exclude '省份' and '地址')
             const displayHeaders = allUniversityCsvHeaders.filter(header => header !== '省份' && header !== '地址');
 
             let tableHTML = '<table border="1" style="width:100%; border-collapse: collapse; font-size: 0.9em;"><thead><tr>';
@@ -239,7 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
             regionUnis.forEach(uni => {
                 tableHTML += '<tr>';
                 displayHeaders.forEach(header => {
-                    tableHTML += `<td>${uni[header] || '-'}</td>`;
+                    let cellValue = uni[header] || '-';
+                    if (header === '985' || header === '211') {
+                        if (cellValue === '1') cellValue = '是';
+                        else if (cellValue === '2') cellValue = '否';
+                        // Keep original if not 1 or 2, or show '-' if empty
+                    } else if (header === '双一流') {
+                        if (cellValue === '双一流') cellValue = '是';
+                        else if (cellValue && cellValue.trim() !== '') cellValue = '否'; // If it has some other value, consider it 'No'
+                        else cellValue = '-'; // If empty
+                    }
+                    tableHTML += `<td>${cellValue}</td>`;
                 });
                 tableHTML += '</tr>';
             });
@@ -257,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.uniPieChart = uniPieChart;
             }
 
-            renderUniversityTable(regionName); // Call table rendering function
+            renderUniversityTable(regionName); 
 
             if (!regionName || regionName === "" || !aggregatedData[regionName]) {
                 uniIndicatorRegionSpan.textContent = "请选择地区";
@@ -298,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     pieSeriesName = '办学性质';
                     break;
                 case 'key_project':
-                    // For key projects, filter out "非重点" if you only want to show 985, 211, 双一流
                     pieDataRaw = Object.fromEntries(
                         Object.entries(dataToShow.keyProjects).filter(([key, _]) => key !== '非重点')
                     );
@@ -346,11 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (uniPieDisplayBySelect) {
                 uniPieDisplayBySelect.addEventListener('change', () => {
-                    // Only update side info if a region is actually selected
                     if (uniSideInfoRegionSelect.value && uniSideInfoRegionSelect.value !== "") {
                         updateSideInfo(uniSideInfoRegionSelect.value);
                     } else {
-                        // Optionally, prompt user to select a region or clear the pie chart
                         showPiePlaceholder(uniPieChart, uniPieChartDom, "请先选择地区，再选择饼图显示方式");
                     }
                 });
