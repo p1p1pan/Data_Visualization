@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: '一本率', name: '一本率', unit: '%' },
         { id: '重点中学比例', name: '重点中学比例', unit: '%' },
         { id: '师生比', name: '师生比', unit: '' },
-        { id: '高等教育毛入学率', name: '高等教育毛入学率', unit: '%' },
+        { id: '高等学校入学率', name: '高等教育入学率', unit: '%' },
         { id: '教育经费合计', name: '教育经费合计', unit: '元' }
     ];
 
