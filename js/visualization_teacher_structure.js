@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const teacherPieRegionSelect = document.getElementById('teacher-pie-region-select');
 
         let teacherStructureChart = echarts.getInstanceByDom(chartDom);
-        if (!teacherStructureChart) {
+        if (!teacherStructureChart || teacherStructureChart.isDisposed()) {
             teacherStructureChart = echarts.init(chartDom);
         }
         window.teacherStructureChart = teacherStructureChart;
@@ -23,13 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (educationPieDom) {
             teacherEducationPieChart = echarts.getInstanceByDom(educationPieDom) || echarts.init(educationPieDom);
             window.teacherEducationPieChart = teacherEducationPieChart;
+        } else {
+            console.error("Education pie chart container 'teacher-education-pie-container' not found!");
         }
+        
         let teacherTitlePieChart = null;
         if (titlePieDom) {
             teacherTitlePieChart = echarts.getInstanceByDom(titlePieDom) || echarts.init(titlePieDom);
             window.teacherTitlePieChart = teacherTitlePieChart;
+        } else {
+            console.error("Title pie chart container 'teacher-title-pie-container' not found!");
         }
-        
 
         let rawData = [];
         const educationLevels = ['博士研究生', '硕士研究生', '本科毕业', '专科毕业', '高中阶段毕业', '高中阶段毕业以下'];
@@ -38,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         async function loadData() {
             try {
-                teacherStructureChart.showLoading({ text: '教师结构数据加载中...' });
+                if (teacherStructureChart && !teacherStructureChart.isDisposed()) {
+                    teacherStructureChart.showLoading({ text: '教师结构数据加载中...' });
+                }
                 const response = await fetch('data/teacher.csv');
                 if (!response.ok) throw new Error(`加载 teacher.csv 失败: ${response.statusText}`);
                 const csvText = await response.text();
@@ -55,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if (header === '地区') {
                             entry[header] = val;
                         } else {
-                            entry[header] = 0; // 将空值或空字符串处理为0
+                            entry[header] = 0; // Default to 0 if data is missing for a category
                         }
                     });
                     return entry['地区'] && entry['地区'] !== '总计' ? entry : null;
@@ -65,11 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 populateTeacherPieRegionSelect();
 
                 console.log("Teacher structure data loaded:", rawData.length);
-                teacherStructureChart.hideLoading();
+                if (teacherStructureChart && !teacherStructureChart.isDisposed()) {
+                    teacherStructureChart.hideLoading();
+                }
                 return rawData.length > 0;
             } catch (error) {
                 console.error("加载或处理教师结构数据失败:", error);
-                teacherStructureChart.hideLoading();
+                if (teacherStructureChart && !teacherStructureChart.isDisposed()) {
+                    teacherStructureChart.hideLoading();
+                }
                 if (chartDom) chartDom.innerHTML = `<p style="color:red;">教师结构数据加载错误: ${error.message}</p>`;
                 return false;
             }
@@ -93,9 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-
         function updateChart() {
-            if (rawData.length === 0) return;
+            if (rawData.length === 0 || !teacherStructureChart || teacherStructureChart.isDisposed()) return;
 
             const stackBy = stackBySelect.value; 
             const valueType = valueTypeSelect.value; 
@@ -116,10 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     stack: 'total', 
                     emphasis: { focus: 'series' },
                     label: {
-                        show: valueType === 'percentage', // 只在百分比时考虑显示
+                        show: valueType === 'percentage',
                         position: 'inside',
                         formatter: function(params) {
-                            return parseFloat(params.value) > 5 ? params.value.toFixed(1) + '%' : ''; // 值大于5%才显示
+                            return parseFloat(params.value) > 5 ? parseFloat(params.value).toFixed(1) + '%' : '';
                         },
                         color: '#fff',
                         fontSize: 9
@@ -140,9 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     axisPointer: { type: 'shadow' },
                     formatter: function (params) {
                         let tooltipStr = params[0].name + '<br/>';
-                        let sumForStack = 0;
-                        params.forEach(item => sumForStack += parseFloat(item.value) || 0);
-
                         params.forEach(item => {
                             const val = parseFloat(item.value) || 0;
                             let displayValue;
@@ -180,92 +186,135 @@ document.addEventListener('DOMContentLoaded', () => {
                 updatePieCharts(teacherPieRegionSelect.value);
             } else if (allRegionsForPies.length > 0) {
                 updatePieCharts(allRegionsForPies[0]);
+            } else {
+                 updatePieCharts(null); // Explicitly update with no region if none are available
             }
         }
 
         function updatePieCharts(regionName) {
-            if (!educationPieDom || !titlePieDom || rawData.length === 0 || !regionName || regionName === 'all') {
-                if(teacherEducationPieChart) teacherEducationPieChart.clear();
-                if(teacherTitlePieChart) teacherTitlePieChart.clear();
-                if(educationPieDom) educationPieDom.innerHTML = `<p style="text-align:center; padding-top:20px;">请选择一个地区查看学历构成饼图</p>`;
-                if(titlePieDom) titlePieDom.innerHTML = `<p style="text-align:center; padding-top:20px;">请选择一个地区查看职称构成饼图</p>`;
+            // Ensure pie chart instances are (re)initialized if necessary
+            if (educationPieDom && (!teacherEducationPieChart || teacherEducationPieChart.isDisposed())) {
+                teacherEducationPieChart = echarts.init(educationPieDom);
+                window.teacherEducationPieChart = teacherEducationPieChart;
+            }
+            if (titlePieDom && (!teacherTitlePieChart || teacherTitlePieChart.isDisposed())) {
+                teacherTitlePieChart = echarts.init(titlePieDom);
+                window.teacherTitlePieChart = teacherTitlePieChart;
+            }
+
+            const showPlaceholder = (chartInstance, message) => {
+                if (chartInstance && !chartInstance.isDisposed()) {
+                    chartInstance.clear();
+                    chartInstance.setOption({
+                        title: {
+                            text: message,
+                            left: 'center',
+                            top: 'center',
+                            textStyle: { fontSize: 12, color: '#888' }
+                        }
+                    });
+                }
+            };
+
+            if (rawData.length === 0 || !regionName || regionName === 'all') {
+                showPlaceholder(teacherEducationPieChart, "请选择一个地区查看学历构成饼图");
+                showPlaceholder(teacherTitlePieChart, "请选择一个地区查看职称构成饼图");
                 return;
             }
-             if(educationPieDom) educationPieDom.innerHTML = ''; 
-             if(titlePieDom) titlePieDom.innerHTML = '';
 
             const regionData = rawData.find(d => d['地区'] === regionName);
+            console.log(`Updating pie charts for region: ${regionName}`, regionData);
+
             if (!regionData) {
-                if(teacherEducationPieChart) teacherEducationPieChart.clear();
-                if(teacherTitlePieChart) teacherTitlePieChart.clear();
+                showPlaceholder(teacherEducationPieChart, `无“${regionName}”地区的学历数据`);
+                showPlaceholder(teacherTitlePieChart, `无“${regionName}”地区的职称数据`);
                 return;
             }
 
-            const educationPieData = educationLevels.map(level => ({
-                name: level,
-                value: regionData[level] || 0
-            })).filter(d => d.value > 0);
+            // Education Pie Chart
+            if (teacherEducationPieChart && !teacherEducationPieChart.isDisposed()) {
+                const educationPieData = educationLevels.map(level => ({
+                    name: level,
+                    value: regionData[level] || 0
+                })).filter(d => d.value > 0);
 
-            const educationPieOption = {
-                title: { text: `${regionName} - 学历构成`, left: 'center', textStyle: { fontSize: 14 } },
-                tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}人 ({d}%)' },
-                legend: { orient: 'vertical', left: 10, top: 30, data: educationPieData.map(d => d.name), type:'scroll' },
-                series: [{
-                    name: '学历构成', type: 'pie', radius: ['40%', '65%'], center: ['55%', '55%'], data: educationPieData,
-                    emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
-                    label: { show: true, formatter: '{b}\n{d}%', fontSize: 10 }, labelLine: { show: true }
-                }]
-            };
-            if(teacherEducationPieChart) teacherEducationPieChart.setOption(educationPieOption, true);
+                if (educationPieData.length > 0) {
+                    const educationPieOption = {
+                        title: { text: `${regionName} - 学历构成`, left: 'center', textStyle: { fontSize: 14 } },
+                        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}人 ({d}%)' },
+                        legend: { orient: 'vertical', left: 10, top: 30, data: educationPieData.map(d => d.name), type:'scroll' },
+                        series: [{
+                            name: '学历构成', type: 'pie', radius: ['40%', '65%'], center: ['55%', '55%'], data: educationPieData,
+                            emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
+                            label: { show: true, formatter: '{b}\n{d}%', fontSize: 10 }, labelLine: { show: true }
+                        }]
+                    };
+                    teacherEducationPieChart.setOption(educationPieOption, true);
+                } else {
+                    showPlaceholder(teacherEducationPieChart, `“${regionName}”地区无有效学历数据`);
+                }
+                teacherEducationPieChart.resize(); 
+            }
 
-            const titlePieData = titles.map(title => ({
-                name: title,
-                value: regionData[title] || 0
-            })).filter(d => d.value > 0);
 
-            const titlePieOption = {
-                title: { text: `${regionName} - 职称构成`, left: 'center', textStyle: { fontSize: 14 } },
-                tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}人 ({d}%)' },
-                legend: { orient: 'vertical', left: 10, top: 30, data: titlePieData.map(d => d.name), type:'scroll' },
-                series: [{
-                    name: '职称构成', type: 'pie', radius: ['40%', '65%'], center: ['55%', '55%'], data: titlePieData,
-                    emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
-                    label: { show: true, formatter: '{b}\n{d}%', fontSize: 10 }, labelLine: { show: true }
-                }]
-            };
-             if(teacherTitlePieChart) teacherTitlePieChart.setOption(titlePieOption, true);
+            // Title Pie Chart
+            if (teacherTitlePieChart && !teacherTitlePieChart.isDisposed()) {
+                const titlePieData = titles.map(title => ({
+                    name: title,
+                    value: regionData[title] || 0
+                })).filter(d => d.value > 0);
+
+                if (titlePieData.length > 0) {
+                    const titlePieOption = {
+                        title: { text: `${regionName} - 职称构成`, left: 'center', textStyle: { fontSize: 14 } },
+                        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}人 ({d}%)' },
+                        legend: { orient: 'vertical', left: 10, top: 30, data: titlePieData.map(d => d.name), type:'scroll' },
+                        series: [{
+                            name: '职称构成', type: 'pie', radius: ['40%', '65%'], center: ['55%', '55%'], data: titlePieData,
+                            emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
+                            label: { show: true, formatter: '{b}\n{d}%', fontSize: 10 }, labelLine: { show: true }
+                        }]
+                    };
+                    teacherTitlePieChart.setOption(titlePieOption, true);
+                } else {
+                    showPlaceholder(teacherTitlePieChart, `“${regionName}”地区无有效职称数据`);
+                }
+                teacherTitlePieChart.resize(); 
+            }
         }
 
-
         if (await loadData()) {
-            updateChart();
+            updateChart(); // This will also call updatePieCharts for the initially selected region
             stackBySelect.addEventListener('change', updateChart);
             valueTypeSelect.addEventListener('change', updateChart);
             if (teacherPieRegionSelect) {
                 teacherPieRegionSelect.addEventListener('change', (e) => updatePieCharts(e.target.value));
             }
 
-
             document.addEventListener('globalRegionChanged', (event) => {
                 const teacherView = document.getElementById('teacher-structure-view');
                 if (teacherView && teacherView.classList.contains('active-view')) {
                     const selectedRegion = event.detail.region;
                     
-                    teacherStructureChart.dispatchAction({ type: 'downplay' }); // 主图表取消高亮
-                    if (selectedRegion && selectedRegion !== 'all') {
-                        const dataIndex = rawData.findIndex(item => item['地区'] === selectedRegion);
-                        if (dataIndex !== -1) {
-                            teacherStructureChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: dataIndex });
-                            // teacherStructureChart.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: dataIndex });
+                    if (teacherStructureChart && !teacherStructureChart.isDisposed()) {
+                        teacherStructureChart.dispatchAction({ type: 'downplay' });
+                        if (selectedRegion && selectedRegion !== 'all') {
+                            const dataIndex = rawData.findIndex(item => item['地区'] === selectedRegion);
+                            if (dataIndex !== -1) {
+                                teacherStructureChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: dataIndex });
+                            }
                         }
-                        // 更新饼图选择器的值并触发饼图更新
-                        if (allRegionsForPies.includes(selectedRegion)) {
-                            teacherPieRegionSelect.value = selectedRegion;
-                            updatePieCharts(selectedRegion);
-                        }
-                    } else if (allRegionsForPies.length > 0) { 
-                        teacherPieRegionSelect.value = allRegionsForPies[0]; 
-                        updatePieCharts(allRegionsForPies[0]);
+                    }
+
+                    if (allRegionsForPies.includes(selectedRegion) && selectedRegion !== 'all') {
+                        if (teacherPieRegionSelect) teacherPieRegionSelect.value = selectedRegion;
+                        updatePieCharts(selectedRegion);
+                    } else if (selectedRegion === 'all' && allRegionsForPies.length > 0) {
+                        // Optionally update pie charts to the first region or show a general placeholder
+                        if (teacherPieRegionSelect) teacherPieRegionSelect.value = allRegionsForPies[0];
+                        updatePieCharts(allRegionsForPies[0]); // Or updatePieCharts(null) for placeholder
+                    } else {
+                        updatePieCharts(null); // Show placeholder if region is not in pie data or 'all' is selected without a default
                     }
                 }
             });

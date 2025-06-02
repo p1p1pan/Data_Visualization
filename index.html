@@ -235,8 +235,24 @@
                 <h3>各地区高校数量、类型及重点建设情况分析</h3>
                 <div class="controls university-stats-controls">
                     <div>
-                        <label for="uni-stats-group-by">图表分组/堆叠方式:</label>
+                        <label for="uni-stats-group-by">柱状图分组方式:</label>
                         <select id="uni-stats-group-by">
+                            <option value="type">按类型</option>
+                            <option value="level">按办学层次</option>
+                            <option value="public_private">按公办/民办</option>
+                            <option value="key_project">按重点建设</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="uni-sideinfo-region-select">查看详情地区:</label>
+                        <select id="uni-sideinfo-region-select">
+                            <!-- Options will be populated by JS -->
+                            <option value="">请先加载数据</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="uni-pie-display-by">饼图显示方式:</label>
+                        <select id="uni-pie-display-by">
                             <option value="type">按类型</option>
                             <option value="level">按办学层次</option>
                             <option value="public_private">按公办/民办</option>
@@ -247,16 +263,17 @@
                 <div id="university-stats-chart-container" class="chart-container" style="height: 500px;">
                     <p style="text-align:center; padding-top:50px;">高校统计图表加载中...</p>
                 </div>
-                <div style="display:flex; justify-content: space-around; margin-top:20px; align-items: flex-start;">
-                    <div id="uni-type-pie-container" style="width:30%; height:300px; border: 1px solid #eee;"></div>
-                    <div id="uni-level-pie-container" style="width:30%; height:300px; border: 1px solid #eee;"></div>
-                    <div id="uni-key-indicators-container" style="width:35%; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
-                        <h4>关键指标 (<span id="uni-indicator-region">全国</span>):</h4>
+                <div style="display:flex; justify-content: space-around; margin-top:20px; align-items: flex-start; flex-wrap: wrap;">
+                    <div id="uni-pie-chart-container" style="width:48%; min-width: 300px; height:350px; border: 1px solid #eee;">
+                        <p style="text-align:center; padding-top:20px;">饼图加载中...</p>
+                    </div>
+                    <div id="uni-key-indicators-container" style="width:48%; min-width: 300px; padding: 10px; border: 1px solid #eee; border-radius: 4px; box-sizing: border-box;">
+                        <h4>关键指标 (<span id="uni-indicator-region">请选择地区</span>):</h4>
                         <p>大学总数: <span id="uni-total-count">-</span></p>
                         <p>985高校数: <span id="uni-985-count">-</span></p>
                         <p>211高校数: <span id="uni-211-count">-</span></p>
                         <p>双一流高校数: <span id="uni-dual-一流-count">-</span></p>
-                        </div>
+                    </div>
                 </div>
                 <div id="university-summary-table-container" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
                      <p style="text-align:center;">大学统计列表加载中...</p>

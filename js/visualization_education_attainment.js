@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.educationAttainmentChart = educationAttainmentChart;
         
         let rawData = [];
-        const attainmentLevels = ['大学(大专及以上)', '高中（含中专）', '初中', '小学'];
+        const attainmentLevels = ['大学(大专及以上)', '高中（含中专）', '初中', '小学', '其他'];
 
         async function loadData() {
             try {
@@ -34,7 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             entry[header] = parseInt(entry[header], 10);
                         }
                     });
-                    return entry['地区'] ? entry : null; // 确保有地区名
+                    if (entry['地区']) {
+                        const sum = attainmentLevels.slice(0, 4).reduce((acc, level) => acc + (entry[level] || 0), 0);
+                        entry['其他'] = 100000 - sum;
+                        return entry;
+                    }
+                    return null;
                 }).filter(Boolean);
 
                 console.log("Education attainment data loaded:", rawData.length);
@@ -51,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateChart() {
             if (rawData.length === 0) return;
 
-            const displayType = displayTypeSelect.value; // 'percentage' or 'absolute'
+            const displayType = displayTypeSelect.value;
             const regions = rawData.map(d => d['地区']);
             
             let seriesData = attainmentLevels.map(level => {
@@ -60,10 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'bar',
                     stack: 'total',
                     emphasis: { focus: 'series' },
-                    label: { // 可选：在柱子内部显示数值或百分比
-                        show: displayType === 'percentage', // 只在百分比时显示，避免绝对数值过大重叠
+                    label: {
+                        show: displayType === 'percentage',
                         position: 'inside',
-                        formatter: '{c}%', // 如果是百分比，显示百分号
+                        formatter: '{c}%',
                         color: '#fff',
                         fontSize: 10
                     },
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     formatter: function (params) {
                         let tooltipStr = params[0].name + '<br/>';
                         params.forEach(item => {
-                             const val = parseFloat(item.value) || 0;
+                            const val = parseFloat(item.value) || 0;
                             let displayValue = displayType === 'percentage' ? val.toFixed(1) + '%' : val.toLocaleString() + '人/十万';
                             tooltipStr += `${item.marker} ${item.seriesName}: ${displayValue}<br/>`;
                         });
@@ -98,13 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'value', 
                     name: displayType === 'percentage' ? '占比 (%)' : '每十万人受教育人数',
                     axisLabel: { formatter: displayType === 'percentage' ? '{value}%' : '{value}' },
-                    max: displayType === 'percentage' ? 100 : null // 百分比时最大值为100
+                    max: displayType === 'percentage' ? 100 : null
                 },
                 series: seriesData
             };
             educationAttainmentChart.setOption(option, true);
         }
-
 
         if (await loadData()) {
             updateChart();
@@ -119,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         const dataIndex = rawData.findIndex(item => item['地区'] === selectedRegion);
                         if (dataIndex !== -1) {
                             educationAttainmentChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: dataIndex });
-                            // educationAttainmentChart.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: dataIndex });
                         }
                     }
                 }
